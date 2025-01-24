@@ -26,6 +26,8 @@ class Feedback:
             COMMAND_FUNCTION_FIND: {},
             COMMAND_FUNCTION_PONG: {},
             COMMAND_FUNCTION_TEMP: {},
+            COMMAND_FUNCTION_PRESS_LONG: {},
+            COMMAND_FUNCTION_PRESS_SHORT: {},
         }
     
     @property
@@ -66,7 +68,7 @@ class Feedback:
         self._data[function][id][pin] = parsed_states[2]
 
     async def __parse_cover(self , parsed_states , line: str , function: str):
-        if len(parsed_states) is not 5:
+        if len(parsed_states) != 5:
             raise ValueError(f"Invalid number of arguments: {line}")
 
         for i in range(1, len(parsed_states)):
@@ -117,13 +119,12 @@ class Feedback:
                 COMMAND_FUNCTION_TEMP: lambda states , line : self.__parse_temp(states , line),
                 COMMAND_FUNCTION_PWM: lambda states , line : self.__parse_metod_3(states , line , COMMAND_FUNCTION_PWM),
                 COMMAND_FUNCTION_COVER: lambda states , line : self.__parse_cover(states , line , COMMAND_FUNCTION_COVER),
-                COMMAND_FUNCTION_FIND: lambda states : self.__parse_find(states),
+                COMMAND_FUNCTION_FIND: lambda states , line: self.__parse_find(states),
+                COMMAND_FUNCTION_PONG: lambda states , line: self.__parse_pong(states),
             }
 
             if str(parts[0]).upper() in COMMAND_MAPPER:
                 await COMMAND_MAPPER[str(parts[0]).upper()](parsed_states , line)
-
-            _LOGGER.debug(f"Parsed data: {self._data}")
 
             if self.callback:
                 await self.callback(self._data) 

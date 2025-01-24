@@ -8,18 +8,14 @@ def rs232_handler():
 pytest.mark.asyncio
 @patch("serial_asyncio.open_serial_connection")
 async def test_open_connection(mock_open_serial):
-    # Mockowanie zwracanych obiektów
     mock_reader = AsyncMock()
     mock_writer = AsyncMock()
     mock_open_serial.return_value = (mock_reader, mock_writer)
 
-    # Tworzenie instancji RS232Handler z odpowiednimi argumentami
     rs232_handler = RS232Handler(port="/dev/ttyUSB0", baudrate=115200)
 
-    # Wywołanie metody open_connection
     await rs232_handler.open_connection()
 
-    # Sprawdzenie, czy open_serial_connection zostało wywołane z odpowiednimi argumentami
     mock_open_serial.assert_called_once_with(url="/dev/ttyUSB0", baudrate=115200)
     mock_writer = AsyncMock()
     rs232_handler.writer = mock_writer
