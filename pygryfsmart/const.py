@@ -1,18 +1,25 @@
-from enum import Enum
+from enum import IntEnum
 
 BAUDRATE = 115200
 
-class OUTPUT_STATES(Enum):
-    ON = 1,
-    OFF = 2,
-    TOGGLE = 3,
+class OUTPUT_STATES(IntEnum):
+    ON = 1
+    OFF = 2
+    TOGGLE = 3
 
-class SCHUTTER_STATES(Enum):
-    CLOSE = 1,
-    OPEN = 2,
-    STOP = 3,
+class SCHUTTER_STATES(IntEnum):
+    CLOSE = 1
+    OPEN = 2
+    STOP = 3
     STEP_MODE = 4
 
-class KEY_MODE:
-    NO = 0,
-    NC = 1,
+class KEY_MODE(IntEnum):
+    NO = 0
+    NC = 1
+
+COMMAND_FUNCTION_IN = "I"
+COMMAND_FUNCTION_OUT = "O"
+COMMAND_FUNCTION_PWM = "LED"
+COMMAND_FUNCTION_COVER = "R"
+COMMAND_FUNCTION_FIND = "AT+FIND"
+COMMAND_FUNCTION_PONG = "PONG"

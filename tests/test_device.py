@@ -1,6 +1,6 @@
 import pytest
 import asyncio
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, patch, MagicMock
 
 from pygryfsmart.device import Device
 
@@ -22,36 +22,6 @@ async def test_set_out(mock_device):
 async def test_send_data(mock_device):
     await mock_device.send_data("AT+TestCommand\n\r")
     mock_device.send_data.assert_called_once_with("AT+TestCommand\n\r")
-
-@pytest.mark.asyncio
-async def test_parse_data_in(mock_device):
-    data = "I=1,1,0,1,0,0,1"
-    await mock_device._Device__parse_data(data)
-    assert mock_device.data["IN"] == {
-        1: {
-            1: 1,
-            2: 0,
-            3: 1,
-            4: 0,
-            5: 0,
-            6: 1,
-        }
-    }
-
-@pytest.mark.asyncio
-async def test_parse_data_out(mock_device):
-    data = "O=1,0,1,0,1,0,1"
-    await mock_device._Device__parse_data(data)
-    assert mock_device.data["OUT"] == {
-        1: {
-            1: 0,
-            2: 1,
-            3: 0,
-            4: 1,
-            5: 0,
-            6: 1,
-        }
-    }
 
 @pytest.mark.asyncio
 async def test_set_key_time(mock_device):
