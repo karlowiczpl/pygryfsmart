@@ -110,4 +110,3 @@ Resets the device. Optionally, updates the states after reset.
 Starts the task that periodically updates the device states.
 
 - **time**: The interval time in seconds between updates.
-```
