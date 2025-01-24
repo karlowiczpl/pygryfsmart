@@ -26,8 +26,6 @@ class Feedback:
             COMMAND_FUNCTION_FIND: {},
             COMMAND_FUNCTION_PONG: {},
             COMMAND_FUNCTION_TEMP: {},
-            COMMAND_FUNCTION_PRESS_LONG: {},
-            COMMAND_FUNCTION_PRESS_SHORT: {},
         }
     
     @property
@@ -114,8 +112,8 @@ class Feedback:
             COMMAND_MAPPER = {
                 COMMAND_FUNCTION_IN: lambda states , line : self.__parse_metod_1(states , line , COMMAND_FUNCTION_IN),
                 COMMAND_FUNCTION_OUT: lambda states , line : self.__parse_metod_1(states , line , COMMAND_FUNCTION_OUT),
-                COMMAND_FUNCTION_PRESS_SHORT: lambda states , line : self.__parse_metod_2(states , line , COMMAND_FUNCTION_PRESS_SHORT , 2),
-                COMMAND_FUNCTION_PRESS_LONG: lambda states , line : self.__parse_metod_2(states , line , COMMAND_FUNCTION_PRESS_LONG , 3),
+                COMMAND_FUNCTION_PRESS_SHORT: lambda states , line : self.__parse_metod_2(states , line , COMMAND_FUNCTION_IN , 2),
+                COMMAND_FUNCTION_PRESS_LONG: lambda states , line : self.__parse_metod_2(states , line , COMMAND_FUNCTION_IN , 3),
                 COMMAND_FUNCTION_TEMP: lambda states , line : self.__parse_temp(states , line),
                 COMMAND_FUNCTION_PWM: lambda states , line : self.__parse_metod_3(states , line , COMMAND_FUNCTION_PWM),
                 COMMAND_FUNCTION_COVER: lambda states , line : self.__parse_cover(states , line , COMMAND_FUNCTION_COVER),
