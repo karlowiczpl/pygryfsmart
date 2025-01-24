@@ -1,6 +1,6 @@
 # GryfSmart
 
-**GryfSmart** is a system that enables remote control of devices via an RS232 serial port. The core of the system is the `Device` class, which provides functionalities for managing devices, such as sending commands, controlling device states, monitoring device statuses, and resetting devices.
+**GryfSmart** is a system that enables control of Gryf smart system devices via an RS232 serial port. The core of the system is the `Device` class, which provides functionalities for managing devices, such as sending commands, controlling device states, monitoring device statuses, and resetting devices.
 
 ## Installation
 
@@ -49,27 +49,28 @@ Sets the output state of the device. This can include turning on or off various 
 
 - **id**: The device ID.
 - **pin**: The pin number (1 to 6).
-- **state**: The output state (e.g., `ON`, `OFF`).
+- **state**: The output state (e.g., `ON`, `OFF`, `TOGGLE`).
+    -  you can import OUTPUT_STATES enum from pygryfsmart.const
 
 #### `set_key_time(ps_time: int, pl_time: int, id: int, pin: int, type: KEY_MODE | int)`
 
 Sets the key press time for the device.
 
-- **ps_time**: The press time in milliseconds.
-- **pl_time**: The release time in milliseconds.
+- **ps_time**: The short press time in milliseconds * 10.
+- **pl_time**: The long press time in milliseconds * 10.
 - **id**: The device ID.
 - **pin**: The pin number (1 to 6).
 - **type**: The type of the key.
-
+  -  you can import KEY_MODES enum from pygryfsmart.const
 #### `search_module(id: int)`
 
-Searches for a device with the given ID. If the ID is non-zero, the device will be searched.
+Retrieves information about the device model and assigns an ID.
 
 - **id**: The device ID.
 
 #### `search_modules(last_module: int)`
 
-Searches for multiple devices, starting from 1 to `last_module`.
+same for multiple devices, starting from 1 to `last_module`.
 
 - **last_module**: The number of devices to be searched.
 
@@ -95,6 +96,7 @@ Controls the cover state for a specific pin on the device.
 - **pin**: The pin number (1 to 4).
 - **time**: The time in milliseconds for the operation.
 - **operation**: The operation to perform (e.g., `OPEN`, `CLOSE`, `STOP`, `STEP_MODE`).
+    -  you can import SCHUTTER_STATES from pygryfsmart.const
 
 #### `reset(module_id: int, update_states: bool)`
 
@@ -109,5 +111,3 @@ Starts the task that periodically updates the device states.
 
 - **time**: The interval time in seconds between updates.
 ```
-
-This format organizes the information in a clear and concise way, making it easy to follow. Let me know if you'd like any further adjustments!
