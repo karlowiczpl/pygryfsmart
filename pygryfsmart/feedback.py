@@ -1,6 +1,3 @@
-import logging
-from datetime import datetime
-
 from pygryfsmart.const import (
     COMMAND_FUNCTION_IN,
     COMMAND_FUNCTION_OUT,
@@ -11,7 +8,15 @@ from pygryfsmart.const import (
     COMMAND_FUNCTION_PRESS_SHORT,
     COMMAND_FUNCTION_PRESS_LONG,
     COMMAND_FUNCTION_TEMP,
+
+    CONF_ID,
+    CONF_PIN,
+    CONF_PTR,
+    CONF_FUNCTION,
 )
+
+from datetime import datetime
+import logging
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -27,10 +32,25 @@ class Feedback:
             COMMAND_FUNCTION_PONG: {},
             COMMAND_FUNCTION_TEMP: {},
         }
-    
+        self._subscribers = []
+        self._temp_subscribers = []
+
     @property
     def data(self):
         return self._data
+
+    async def handle_subscribtion(self , function: str):
+        try:
+            for sub in self._subscribers:
+                if function == sub[CONF_FUNCTION]:
+                    await sub[CONF_PTR](self._data.get(function , {}).get(sub.get(CONF_ID) , {}).get(sub.get(CONF_PIN) , 0))
+        except Exception as e:
+            _LOGGER.error(f"Error subscriber {e}")
+
+    async def handle_temp_subscribtion(self , id: int , pin: int):
+        for sub in self._temp_subscribers:
+            if id == sub[CONF_ID] and pin == sub[CONF_PIN]:
+                await sub[CONF_PIN](self._data.get(COMMAND_FUNCTION_TEMP , {}).get(id , {}).get(pin , 0))
 
     async def __parse_metod_1(self , parsed_states , line: str , function: str):
         if len(parsed_states) not in {7 , 9}:
@@ -44,6 +64,10 @@ class Feedback:
             if pin not in self._data[function]:
                 self._data[function][pin] = {}
             self._data[function][pin][i] = int(parsed_states[i])                   
+        try:
+            await self.handle_subscribtion(function)
+        except Exception as e:
+            _LOGGER.error(f"Error subscriber {e}")
 
     async def __parse_metod_2(self , parsed_states , line: str , function: str , prefix: int):
         if parsed_states[0] not in {"1" , "2" , "3" , "4" , "5" , "6" , "7" , "8"}:
@@ -54,6 +78,10 @@ class Feedback:
         if id not in self._data[function]:
             self._data[function][id] = {}
         self._data[function][id][pin] = prefix
+        try:
+            await self.handle_subscribtion(function)
+        except Exception as e:
+            _LOGGER.error(f"Error subscriber {e}")
 
     async def __parse_metod_3(self , parsed_states , line: str , function: str):
         if parsed_states[0] not in {"1" , "2" , "3" , "4" , "5" , "6" , "7" , "8"}:
@@ -64,6 +92,10 @@ class Feedback:
         if id not in self._data[function]:
             self._data[function][id] = {}
         self._data[function][id][pin] = parsed_states[2]
+        try:
+            await self.handle_subscribtion(function)
+        except Exception as e:
+            _LOGGER.error(f"Error subscriber {e}")
 
     async def __parse_cover(self , parsed_states , line: str , function: str):
         if len(parsed_states) != 5:
@@ -77,6 +109,10 @@ class Feedback:
             if pin not in self._data[function]:
                 self._data[function][pin] = {}
             self._data[function][pin][i] = int(parsed_states[i])                   
+        try:
+            await self.handle_subscribtion(function)
+        except Exception as e:
+            _LOGGER.error(f"Error subscriber {e}")
 
     async def __parse_temp(self , parsed_states , line: str):
         if parsed_states[0] not in {"1" , "2" , "3" , "4" , "5" , "6" , "7" , "8"}:
@@ -87,6 +123,10 @@ class Feedback:
         if id not in self._data[COMMAND_FUNCTION_TEMP]:
             self._data[COMMAND_FUNCTION_TEMP][id] = {}
         self._data[COMMAND_FUNCTION_TEMP][id][pin] = float(f"{parsed_states[2]}.{parsed_states[3]}")
+        try:
+            await self.handle_temp_subscribtion(id , pin)
+        except Exception as e:
+            _LOGGER.error(f"Error subscriber {e}")
 
     async def __parse_find(self , parsed_states):
         id = int(parsed_states[0])
@@ -97,7 +137,12 @@ class Feedback:
 
         id = int(parsed_states[0])
         self._data[COMMAND_FUNCTION_PONG][id] = now.strftime("%H:%M")
+    
+    def subscribe(self , conf: dict):
+        self._subscribers.append(conf)
 
+    def subscribe_temp(self , conf: dict):
+        self._temp_subscribers.append(conf)
 
     async def input_data(self , line):
         if line == "??????????":
@@ -125,6 +170,7 @@ class Feedback:
                 await COMMAND_MAPPER[str(parts[0]).upper()](parsed_states , line)
 
             if self.callback:
-                await self.callback(self._data) 
+                await self.callback() 
+
         except Exception as e:
             _LOGGER.error(f"ERROR parsing data: {e}")

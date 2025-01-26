@@ -1,7 +1,11 @@
 from pygryfsmart.feedback import Feedback
 from pygryfsmart.rs232 import RS232Handler
+from pygryfsmart.gryfexpert import GryfExpert
 from pygryfsmart.const import (
     BAUDRATE,
+    COMMAND_FUNCTION_COVER,
+    COMMAND_FUNCTION_PWM,
+    COMMAND_FUNCTION_TEMP,
     KEY_MODE,
     OUTPUT_STATES,
     SCHUTTER_STATES,
@@ -17,15 +21,21 @@ from pygryfsmart.const import (
     COMMAND_FUNCTION_PING,
     COMMAND_FUNCTION_SET_PRESS_TIME,
     COMMADN_FUNCTION_SEARCH_MODULE,
+
+    CONF_ID,
+    CONF_PIN,
+    CONF_PTR,
+    CONF_FUNCTION
 )
 
 import asyncio
 import logging
 
-
 _LOGGER = logging.getLogger(__name__)
 
-class Device(RS232Handler):
+class GryfApi(RS232Handler):
+    _gryf_expert: GryfExpert
+
     def __init__(self, port , callback = None):
         super().__init__(port, BAUDRATE)
         self.feedback = Feedback(callback=callback)
@@ -33,6 +43,37 @@ class Device(RS232Handler):
         self._update_task = None
         self._connection_task = None
         self._last_ping = 0
+        self._input_message_subscribers = []
+        self._output_message_subscribers = []
+
+    async def sending_data_to_gryf_expert(self , message):
+        if self._gryf_expert.enable == True:
+            await self._gryf_expert.send_data(message)
+
+    def subscribe_input_message(self, func):
+        self._input_message_subscribers.append(func)
+
+    def subscribe_output_message(self , func):
+        self._output_message_subscribers.append(func)
+
+    def subscribe(self , id , pin , func, ptr):
+        if func in {COMMAND_FUNCTION_IN,
+                    COMMAND_FUNCTION_OUT,
+                    COMMAND_FUNCTION_TEMP,
+                    COMMAND_FUNCTION_PWM,
+                    COMMAND_FUNCTION_COVER}:
+            data = {
+                CONF_ID: id,
+                CONF_PIN: pin,
+                CONF_FUNCTION: func,
+                CONF_PTR: ptr
+            }
+            if func != COMMAND_FUNCTION_TEMP:
+                self.feedback.subscribe(data)
+            else:
+                self.feedback.subscribe_temp(data)
+        else:
+            _LOGGER.error(f"Bad function to subscribe: {func}")
 
     def set_callback(self , callback):
         self.feedback.callback = callback
@@ -59,6 +100,9 @@ class Device(RS232Handler):
                 line = await super().read_data()
                 _LOGGER.debug(f"Received data: {line}")
                 await self.feedback.input_data(line)
+                if self._input_message_subscribers:
+                    for subscribers in self._input_message_subscribers:
+                        await subscribers(line)
         except asyncio.CancelledError:
             _LOGGER.info("Connection task cancelled.")
             await self.close_connection()
@@ -75,6 +119,9 @@ class Device(RS232Handler):
 
     async def send_data(self, data):
         await super().send_data(data)
+
+        for subscribers in self._output_message_subscribers:
+            subscribers(data)
 
     async def set_out(self, id: int, pin: int , state: OUTPUT_STATES | int):
         states = ["0"] * 8 if pin > 6 else ["0"] * 6
