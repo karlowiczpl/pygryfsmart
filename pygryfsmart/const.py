@@ -1,4 +1,4 @@
-from enum import IntEnum
+from enum import IntEnum , Enum
 
 BAUDRATE = 115200
 
@@ -16,6 +16,13 @@ class SCHUTTER_STATES(IntEnum):
 class KEY_MODE(IntEnum):
     NO = 0
     NC = 1
+
+class DriverFunctions(Enum):
+    INPUTS = "I"
+    OUTPUTS = "O"
+    PWM = "LED"
+    COVER = "R"
+    TEMP = "T"
 
 COMMAND_FUNCTION_IN = "I"
 COMMAND_FUNCTION_OUT = "O"
