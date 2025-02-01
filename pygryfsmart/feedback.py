@@ -69,6 +69,9 @@ class Feedback:
         except Exception as e:
             _LOGGER.error(f"Error subscriber {e}")
 
+        now = datetime.now()
+        self._data[COMMAND_FUNCTION_PONG][int(parsed_states[0])] = now.strftime("%H:%M")
+
     async def __parse_metod_2(self , parsed_states , line: str , function: str , prefix: int):
         if parsed_states[0] not in {"1" , "2" , "3" , "4" , "5" , "6" , "7" , "8"}:
             raise ValueError(f"Argument out of scope: {line}")

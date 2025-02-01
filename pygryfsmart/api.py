@@ -4,6 +4,7 @@ from pygryfsmart.gryfexpert import GryfExpert
 from pygryfsmart.const import (
     BAUDRATE,
     COMMAND_FUNCTION_COVER,
+    COMMAND_FUNCTION_PONG,
     COMMAND_FUNCTION_PWM,
     COMMAND_FUNCTION_TEMP,
     KEY_MODE,
@@ -30,6 +31,7 @@ from pygryfsmart.const import (
 
 import asyncio
 import logging
+from datetime import datetime , timedelta
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -55,6 +57,24 @@ class GryfApi(RS232Handler):
 
     def subscribe_output_message(self , func):
         self._output_message_subscribers.append(func)
+
+    def avaiable_module(self , id: int) -> bool:
+        last_call = self.feedback.data[COMMAND_FUNCTION_PONG].get(1 , None)
+        now = datetime.now()
+        current_time = now.strftime("%H:%M")
+
+        if last_call == None:
+            return False
+
+        now_dt = datetime.strptime(current_time , "%H:%M")
+        last_dt = datetime.strptime(last_call , "%H:%M")
+
+        if now_dt - last_dt < timedelta(minutes=2):
+            return True
+        return False
+
+    def ping_connection(self):
+        return self.ping(1)
 
     def subscribe(self , id , pin , func, ptr):
         if func in {COMMAND_FUNCTION_IN,
