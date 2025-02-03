@@ -1,10 +1,10 @@
 # GryfSmart
 
-**GryfSmart** is a system that enables control of Gryf smart system devices via an RS232 serial port. The core of the system is the `Device` class, which provides functionalities for managing devices, such as sending commands, controlling device states, monitoring device statuses, and resetting devices.
+**GryfSmart** is a system that enables control of Gryf smart system devices via an RS232 serial port. The core of the system is the `pygryfsmart.api.GryfApi` class, which provides functionalities for managing devices, such as sending commands, controlling device states, monitoring device statuses, and resetting devices.
 
 ## Installation
 
-To use **GryfSmart**, you need to install the necessary dependencies and import the `Device` class.
+To use **GryfSmart**, you need to install the necessary dependencies and import the `pygryfsmart.api.GryfApi` class.
 
 ### Install Dependencies
 
@@ -14,7 +14,7 @@ pip install pygryfsmart
 
 ## Device Class
 
-### Constructor: `Device(port, callback=None)`
+### Constructor: `GryfApi(port, callback=None)`
 
 Creates a new `Device` object that connects to the device via the RS232 serial port.
 
@@ -110,3 +110,20 @@ Resets the device. Optionally, updates the states after reset.
 Starts the task that periodically updates the device states.
 
 - **time**: The interval time in seconds between updates.
+
+## Subscribe metods:
+
+#### `subscribe input messages(fun_ptr)`
+
+- **fun_ptr**: Function to handle new messages from controllers.
+
+#### `subscribe output messages(fun_ptr)`
+
+- **fun_ptr**: Function to handle all sending messages.
+
+#### 'subscribe(id , pin , func , fun_ptr`
+
+- **id**: The device ID.
+- **pin**: The pin number.
+- **func**: selected function, for example DriverFunctions.INPUTS, you can import this from pygryfsmart.const.
+- **fun_ptr**: handle function
