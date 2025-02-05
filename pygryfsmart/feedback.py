@@ -105,7 +105,7 @@ class Feedback:
             raise ValueError(f"Invalid number of arguments: {line}")
 
         for i in range(1, len(parsed_states)):
-            if parsed_states[i] not in {"0" , "1"}:
+            if parsed_states[i] not in {"0" , "1" , "2"}:
                 raise ValueError(f"Wrong parameter value: {line}")
 
             pin = int(parsed_states[0])

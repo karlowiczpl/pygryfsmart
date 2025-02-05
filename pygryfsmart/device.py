@@ -1,9 +1,12 @@
 from datetime import datetime
 import logging
 from typing import Any
+import asyncio
 
 from pygryfsmart.api import GryfApi
+from pygryfsmart.gryfexpert import GryfExpert
 from pygryfsmart.const import (
+    COMMAND_FUNCTION_COVER,
     COMMAND_FUNCTION_PONG,
     COMMAND_FUNCTION_PWM,
     COMMAND_FUNCTION_TEMP,
@@ -12,6 +15,7 @@ from pygryfsmart.const import (
     OUTPUT_STATES,
     COMMAND_FUNCTION_IN,
     COMMAND_FUNCTION_OUT,
+    SCHUTTER_STATES,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -111,7 +115,7 @@ class _GryfTemperature(_GryfDevice):
 
 class _GryfPwm(_GryfDevice):
     
-    _last_level: int
+    _last_level = 70
     _is_on: bool
 
     def __init__(self,
@@ -255,3 +259,170 @@ class _GryfThermostat(_GryfDevice):
     @property
     def name(self):
         return f"{self._name}"
+
+class _GryfCover(_GryfDevice):
+
+    def __init__(
+        self,
+        name: str,
+        id: int,
+        pin: int,
+        time: int,
+        api: GryfApi,
+    ):
+        super().__init__(name,
+                         id,
+                         pin,
+                         api)
+
+        self._time = time
+
+    def subscribe(self , update_fun_ptr):
+        self._api.subscribe(self._id , self._pin, COMMAND_FUNCTION_COVER , update_fun_ptr)
+
+    @property
+    def name(self):
+        return f"{self._name}"
+
+    async def turn_on(self):
+        await self._api.set_cover(self._id , self._pin , self._time , SCHUTTER_STATES.OPEN)
+
+    async def turn_off(self):
+        await self._api.set_cover(self._id , self._pin , self._time , SCHUTTER_STATES.CLOSE)
+
+    async def toggle(self):
+        await self._api.set_cover(self._id , self._pin , self._time , SCHUTTER_STATES.STEP_MODE)
+
+    async def stop(self):
+        await self._api.set_cover(self._id , self._pin , self._time , SCHUTTER_STATES.STOP)
+
+class _GryfPCover(_GryfDevice):
+
+    def __init__(self,
+                 name: str,
+                 id: int,
+                 pin: int,
+                 time: int,
+                 api: GryfApi
+                 ) -> None:
+        super().__init__(
+            name,
+            id,
+            pin,
+            api,
+        )
+
+        self._opening_time = time
+        self._current_postion = 0
+        self._expected_postion = 0
+        self._one_interval_position_move = 500 / time
+        self._timer_en = False
+        self._timer_task = None
+        self._opening_postion = 0
+        self._opening_postion_en = False
+        self._operation = SCHUTTER_STATES.STOP
+        self._time_to_sleep = 0.0
+
+    async def turn_on(self):
+        await self._api.set_cover(self._id , self._pin , self._opening_time , SCHUTTER_STATES.OPEN)
+
+    async def turn_off(self):
+        await self._api.set_cover(self._id , self._pin , self._opening_time , SCHUTTER_STATES.CLOSE)
+
+    async def toggle(self):
+        await self._api.set_cover(self._id , self._pin , self._opening_time , SCHUTTER_STATES.STEP_MODE)
+
+    async def stop(self):
+        await self._api.set_cover(self._id , self._pin , 0, SCHUTTER_STATES.STOP)
+
+    async def __timer(self):
+        self._timer_en = True
+
+        while abs(self._current_postion - self._expected_postion) > 1:
+
+            if self._expected_postion > self._current_postion:
+                self._current_postion += self._one_interval_position_move
+            elif self._expected_postion < self._current_postion:
+                self._current_postion -= self._one_interval_position_move
+ 
+            _LOGGER.debug("%s" , self._current_postion)
+
+            if not self._opening_postion_en:
+                await self.__send_postion_to_move()
+                self._opening_postion_en = True
+                self._opening_postion = self._expected_postion
+
+            if abs(self._expected_postion - self._opening_postion) > 2:
+                if self._opening_postion > self._current_postion and self._current_postion > self._expected_postion:
+                    await self.stop()
+                    await self.__send_postion_to_move()
+                elif self._expected_postion > self._current_postion and self._current_postion > self._opening_postion:
+                    await self.stop()
+                    await self.__send_postion_to_move()
+
+            await asyncio.sleep(0.5)
+
+        await asyncio.sleep(self._time_to_sleep)
+        self._time_to_sleep = 0.0
+        await self.stop()
+
+        self._timer_en = False
+        self._opening_postion_en = False
+
+    async def __send_postion_to_move(self):
+        self._operation = SCHUTTER_STATES.OPEN if self._current_postion < self._expected_postion else SCHUTTER_STATES.CLOSE
+        time_to_move = int((abs(self._current_postion - self._expected_postion) * self._opening_time) / 100)
+
+        await self._api.set_cover(self._id , self._pin , time_to_move , self._operation)
+
+        if time_to_move > 10:
+            self._time_to_sleep += 0.5
+
+    def set_current_postion(self , current_postion: int):
+        self._current_postion = current_postion
+
+    async def set_position(self , position: int):
+
+        self._expected_postion = position
+
+        if not self._timer_en:
+            self._opening_postion = 0
+            self._opening_postion_en = False
+            self._timer_task = asyncio.create_task(self.__timer())
+
+class _GryfReset(_GryfDevice):
+    
+    def __init__(
+        self,
+        api: GryfApi,
+    ) -> None:
+        super().__init__("Gryf RST",
+                         0,
+                         0,
+                         api)
+    
+    @property
+    def name(self):
+        return "Gryf RST"
+
+    async def reset_all(self):
+        await self._api.reset(0 , True)
+
+    async def reset_single_module(self , module):
+        await self._api.reset(module , True)
+
+class _GryfExpert(_GryfDevice):
+    
+    _expert: GryfExpert
+
+    def __init__(self , api: GryfApi) -> None:
+        super().__init__("Gryf Expert" , 0 , 0 , api)
+
+    async def start(self):
+
+        self._expert = GryfExpert(self._api)
+        await self._expert.start_server()
+
+    async def stop(self):
+
+        await self._expert.stop_server()

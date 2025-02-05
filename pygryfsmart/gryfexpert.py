@@ -18,6 +18,7 @@ class GryfExpert:
         addr = writer.get_extra_info('peername')
         _LOGGER.debug(f"Connected with: {addr}")
         self.writer = writer
+        writer.send_data("Hello")
         try:
             while True:
                 data = await reader.read(1024)
@@ -28,7 +29,7 @@ class GryfExpert:
                 message = data.decode().strip() + "\n\r"
                 _LOGGER.debug(f"message from {addr}: {message}")
 
-                await self._api.send_data(message)
+                await self._api.send_data(f"{message}\n\r")
         except asyncio.CancelledError:
             _LOGGER.error(f"Client: {addr} stop connection")
         except Exception as e:

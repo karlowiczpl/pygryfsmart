@@ -141,7 +141,7 @@ class GryfApi(RS232Handler):
         await super().send_data(data)
 
         for subscribers in self._output_message_subscribers:
-            subscribers(data)
+            await subscribers(data)
 
     async def set_out(self, id: int, pin: int , state: OUTPUT_STATES | int):
         states = ["0"] * 8 if pin > 6 else ["0"] * 6
