@@ -138,6 +138,8 @@ class _GryfPwm(_GryfDevice):
         if level > 0:
             self._last_level = level
         await self._api.set_pwm(self._id , self._pin , level)
+        await asyncio.sleep(1)
+        await self._api.send_data(f"stateLED={self._id}\n\r")
 
     async def turn_on(self):
         await self._api.set_pwm(self._id , self._pin , self._last_level)
@@ -196,7 +198,7 @@ class _GryfOutputLine(_GryfDevice):
 class _GryfThermostat(_GryfDevice):
 
     _t_state: float
-    _o_state: bool
+    _o_state = False
 
     def __init__(
         self,
@@ -220,8 +222,8 @@ class _GryfThermostat(_GryfDevice):
         self._differential = differential
 
     def subscribe(self , update_fun_ptr):
-        self._api.subscribe(self._id , self._pin, COMMAND_FUNCTION_OUT , update_fun_ptr)
-        self._api.subscribe(self._t_id , self._t_pin, COMMAND_FUNCTION_TEMP , update_fun_ptr)
+        self._api.subscribe(self._id , self._pin, COMMAND_FUNCTION_OUT , self.update_out)
+        self._api.subscribe(self._t_id , self._t_pin, COMMAND_FUNCTION_TEMP , self.update_temperature)
         self._update_fun_ptr = update_fun_ptr
 
     async def update_temperature(self , state):
@@ -233,9 +235,9 @@ class _GryfThermostat(_GryfDevice):
         }
         
         if self._enable:
-            if self._target_temperature + self._differential > self._t_state:
+            if self._t_state > self._target_temperature + self._differential:
                 await self._api.set_out(self._id , self._pin , OUTPUT_STATES.OFF)
-            elif self._target_temperature - self._differential < self._t_state:
+            elif self._t_state < self._target_temperature - self._differential: 
                 await self._api.set_out(self._id , self._pin , OUTPUT_STATES.ON)
 
         await self._update_fun_ptr(data)
@@ -253,7 +255,7 @@ class _GryfThermostat(_GryfDevice):
             CONF_TEMPERATURE: self._t_state,
             CONF_OUT: self._o_state
         }
-        
+
         await self._update_fun_ptr(data)
 
     @property

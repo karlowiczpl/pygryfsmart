@@ -48,9 +48,13 @@ class Feedback:
             _LOGGER.error(f"Error subscriber {e}")
 
     async def handle_temp_subscribtion(self , id: int , pin: int):
+        pass
+        # _LOGGER.debug("test: %s , %s , %s" , id , pin , self._temp_subscribers)
         for sub in self._temp_subscribers:
+            # _LOGGER.debug("sub: %s" , sub)
             if id == sub[CONF_ID] and pin == sub[CONF_PIN]:
-                await sub[CONF_PIN](self._data.get(COMMAND_FUNCTION_TEMP , {}).get(id , {}).get(pin , 0))
+                await sub[CONF_PTR](self._data.get(COMMAND_FUNCTION_TEMP , {}).get(id , {}).get(pin , 0))
+                # await sub[CONF_PTR]("test")
 
     async def __parse_metod_1(self , parsed_states , line: str , function: str):
         if len(parsed_states) not in {7 , 9}:

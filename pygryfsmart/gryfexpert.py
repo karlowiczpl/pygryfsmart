@@ -37,6 +37,7 @@ class GryfExpert:
         finally:
             _LOGGER.debug(f"Closing connection with {addr}")
             writer.close()
+            self.writer = None
             await writer.wait_closed()
 
     async def send_data(self , message):

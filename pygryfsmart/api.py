@@ -76,7 +76,7 @@ class GryfApi(RS232Handler):
     def ping_connection(self):
         return self.ping(1)
 
-    def subscribe(self , id , pin , func, ptr):
+    def subscribe(self , id: int, pin: int, func: str, ptr):
         if func in {COMMAND_FUNCTION_IN,
                     COMMAND_FUNCTION_OUT,
                     COMMAND_FUNCTION_TEMP,
