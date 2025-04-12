@@ -54,4 +54,3 @@ class GryfCover:
         if not self.__cover_task:
             self.__cover_task
             
-

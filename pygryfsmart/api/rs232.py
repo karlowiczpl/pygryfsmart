@@ -1,5 +1,5 @@
-import logging
 from serial_asyncio import open_serial_connection
+import logging
 
 _LOGGER = logging.getLogger(__name__)
 

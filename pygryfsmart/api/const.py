@@ -1,0 +1,61 @@
+from enum import IntEnum , Enum
+
+BAUDRATE = 115200
+PORT = 4510
+
+class OUTPUT_STATES(IntEnum):
+    """Enum with Output states."""
+
+    ON = 1
+    OFF = 2
+    TOGGLE = 3
+
+class SCHUTTER_STATES(IntEnum):
+    """Enum with Shutter states."""
+
+    CLOSE = 1
+    OPEN = 2
+    STOP = 3
+    STEP_MODE = 4
+
+class KEY_MODE(IntEnum):
+    "Enum with key modes."
+
+    NO = 0
+    NC = 1
+
+class DriverFunctions(Enum):
+    """Enum with driver functions."""
+
+    INPUTS = "I"
+    OUTPUTS = "O"
+    PWM = "LED"
+    COVER = "R"
+    TEMP = "T"
+
+COMMAND_FUNCTION_IN = "I"
+COMMAND_FUNCTION_OUT = "O"
+COMMAND_FUNCTION_PWM = "LED"
+COMMAND_FUNCTION_COVER = "R"
+COMMAND_FUNCTION_FIND = "AT+FIND"
+COMMAND_FUNCTION_PONG = "PONG"
+COMMAND_FUNCTION_PRESS_SHORT = "PS"
+COMMAND_FUNCTION_PRESS_LONG = "PL"
+COMMAND_FUNCTION_TEMP = "T"
+
+COMMAND_FUNCTION_GET_IN_STATE = "AT+StanIN"
+COMMAND_FUNCTION_GET_OUT_STATE = "AT+StanOUT"
+COMMAND_FUNCTION_SET_OUT = "AT+SetOut"
+COMMAND_FUNCTION_SET_COVER = "AT+SetRol"
+COMMAND_FUNCTION_SET_PWM = "SetLED"
+COMMAND_FUNCTION_PING = "PING"
+COMMAND_FUNCTION_SET_PRESS_TIME = "AT+Key"
+COMMADN_FUNCTION_SEARCH_MODULE = "AT+Search"
+COMMAND_FUNCTION_RESET = "AT+RST"
+
+CONF_ID = "id"
+CONF_PIN = "pin"
+CONF_PTR = "ptr"
+CONF_FUNCTION = "fun"
+CONF_TEMPERATURE = "temp"
+CONF_OUT = "out"

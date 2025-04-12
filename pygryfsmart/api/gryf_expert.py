@@ -1,11 +1,21 @@
+"""File with GryfExpert server class."""
+
 import asyncio
 import logging
 
 _LOGGER = logging.getLogger(__name__)
 
 class GryfExpert:
+    """GryfExpert class."""
 
-    def __init__(self, api , host='127.0.0.1', port=8888):
+    def __init__(
+            self,
+            api,
+            host='127.0.0.1', 
+            port=4210
+        ) -> None:
+        """Initialise GryfExpert class."""
+
         self.host = host
         self.port = port
 
@@ -13,13 +23,24 @@ class GryfExpert:
         self.server = None
         self._enable = False
         self._api = api
+        self.active_clients = set()
+        self.server_task = None
 
-    async def handle_client(self, reader, writer):
+    async def handle_client(
+            self,
+            reader, 
+            writer
+        ) -> None:
+        """Handle new server client."""
+
         addr = writer.get_extra_info('peername')
         _LOGGER.debug(f"Connected with: {addr}")
-        self.writer = writer
-        writer.send_data("Hello")
+        self.active_clients.add(writer)
+
         try:
+            message = "hello"
+            writer.write(message.encode())
+            await writer.drain()
             while True:
                 data = await reader.read(1024)
                 if not data:
@@ -38,21 +59,29 @@ class GryfExpert:
             _LOGGER.debug(f"Closing connection with {addr}")
             writer.close()
             self.writer = None
+            self.active_clients.remove(writer)
             await writer.wait_closed()
+            return
 
-    async def send_data(self , message):
-        if self.writer:
+    async def send_data(
+            self,
+            message
+        ) -> None:
+        """Sending data to GryfExpert."""
+
+        if self.active_clients:
             try:
-                self.writer.write(message.encode())
-                await self.writer.drain()
+                message += "\n"
+                for client in self.active_clients:
+                    client.write(message.encode())
+                    await client.drain()
             except Exception as e:
                 _LOGGER.error(f"Unable to send message: {message}, error: {e}")
             finally:
                 return
-        else:
-            _LOGGER.error(f"No client is connected")
 
-    async def stop_server(self):
+    async def stop_server(self) -> None:
+        """Stop GryfExpert server."""
         if self.server:
             _LOGGER.debug("Stopping the server")
             self.server.close()
@@ -63,19 +92,21 @@ class GryfExpert:
 
         self._enable = False
 
-    async def start_server(self):
+    async def start_server(self) -> None:
+        """Start GryfExpert server."""
         self._api.subscribe_input_message(self.send_data)
         self.server = await asyncio.start_server(
             self.handle_client, self.host, self.port
         )
 
         addr = self.server.sockets[0].getsockname()
-
-        async with self.server:
-            await self.server.serve_forever()
+        _LOGGER.info(f"Server started on {addr}")
 
         self._enable = True
+        self.server_task = asyncio.create_task(self.server.serve_forever())
 
     @property
-    def enable(self):
+    def enable(self) -> bool:
+        """Return is server enable."""
         return self._enable
+
