@@ -14,6 +14,7 @@ from .const import (
     COMMAND_FUNCTION_PING,
     COMMAND_FUNCTION_SET_PRESS_TIME,
     COMMADN_FUNCTION_SEARCH_MODULE,
+    COMMAND_FUNCTION_GET_OUT_STATE,
 )
 from .communications import _GryfCommunicationApiBase
 
@@ -43,6 +44,9 @@ class _GryfFunctionsApiBase(_GryfCommunicationApiBase):
         states[pin - 1] = str(state)
 
         command = f"{COMMAND_FUNCTION_SET_OUT}={id}," + ",".join(states) + "\n\r"
+        await self.send_data(command)
+
+        command = f"{COMMAND_FUNCTION_GET_OUT_STATE}={id}\n\r"
         await self.send_data(command)
 
     async def set_key_time(

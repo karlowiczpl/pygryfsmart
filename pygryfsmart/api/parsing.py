@@ -80,9 +80,6 @@ class Parser:
             _LOGGER.error(f"Error subscriber {e}")
 
     async def parse_temp(self , parsed_states , line: str):
-        if parsed_states[0] not in {"1" , "2" , "3" , "4" , "5" , "6" , "7" , "8"}:
-            raise ValueError(f"Argument out of scope: {line}")
-
         pin = int(parsed_states[1])
         id = int(parsed_states[0])
         if id not in self._api._data[COMMAND_FUNCTION_TEMP]:

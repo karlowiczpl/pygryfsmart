@@ -122,14 +122,16 @@ class _GryfCommunicationApiBase():
 
     async def __connection_task(self) -> None:
         """Connection task."""
-
         try:
             while True:
                 line = await self._writer.read_data()
-                await self.feedback.input_data(line)
-                if self._input_message_subscribers:
-                    for subscribers in self._input_message_subscribers:
-                        await subscribers(line)
+                commands = line.splitlines()
+
+                for cmd in commands:
+                    await self.feedback.input_data(cmd)
+                    if self._input_message_subscribers:
+                        for subscribers in self._input_message_subscribers:
+                            await subscribers(cmd)
         except asyncio.CancelledError:
             _LOGGER.info("Connection task cancelled.")
             await self._writer.close_connection()
@@ -173,6 +175,7 @@ class _GryfCommunicationApiBase():
 
                         command = f"{COMMAND_FUNCTION_GET_OUT_STATE}={i + 1}\n\r"
                         await self.send_data(command)
+                        await asyncio.sleep(5)
                     except Exception as e:
                         _LOGGER.error(f"Error updating module {i + 1}: {e}")
 
