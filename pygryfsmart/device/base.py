@@ -8,6 +8,7 @@ class _GryfDevice:
     _id: int
     _pin: int
     _api: GryfApi
+    _attributes = {}
 
     def __init__(self,
                  name: str,
@@ -26,3 +27,7 @@ class _GryfDevice:
     @property
     def available(self):
         return self._api.avaiable_module(self._id)
+
+    @property
+    def extra_attributes(self):
+        return self._attributes

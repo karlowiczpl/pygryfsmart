@@ -7,6 +7,8 @@ class GryfOutputLine(_GryfDevice):
                  name: str,
                  api: GryfApi,
                  ) -> None:
+        self._attributes = {}
+
         super().__init__(name, 
                          0, 
                          0, 

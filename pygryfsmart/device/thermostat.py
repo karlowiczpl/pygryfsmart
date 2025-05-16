@@ -23,6 +23,13 @@ class GryfThermostat(_GryfDevice):
         differential: int,
         api: GryfApi,
     ):
+        self._attributes = {
+            "id out": id,
+            "pin out": pin,
+            "id temp": temperature_id,
+            "pin temp": temperature_pin,
+        }
+
         super().__init__(name,
                          id,
                          pin,

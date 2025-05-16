@@ -17,6 +17,11 @@ class GryfPwm(_GryfDevice):
                  api: GryfApi,
                  callback=None,
                  ) -> None:
+        self._attributes = {
+            "id": id,
+            "pin": pin,
+        }
+
         super().__init__(name, 
                          id, 
                          pin, 

@@ -17,6 +17,12 @@ class GryfPCover(_GryfDevice):
                  time: int,
                  api: GryfApi
                  ) -> None:
+        self._attributes = {
+            "id": id,
+            "pin": pin,
+            "time": time
+        }
+
         super().__init__(
             name,
             id,

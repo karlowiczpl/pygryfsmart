@@ -18,3 +18,5 @@ class _GryfExpert(_GryfDevice):
     async def stop(self):
 
         await self._expert.stop_server()
+        self._attributes = {
+        }

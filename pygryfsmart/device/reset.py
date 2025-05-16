@@ -8,6 +8,8 @@ class GryfReset(_GryfDevice):
         self,
         api: GryfApi,
     ) -> None:
+        self._attributes = {}
+
         super().__init__("Gryf RST",
                          0,
                          0,

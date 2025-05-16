@@ -19,6 +19,12 @@ class GryfCover(_GryfDevice):
 
         self._time = time
 
+        self._attributes = {
+            "id": id,
+            "pin": pin,
+            "time": time
+        }
+
     def subscribe(self , update_fun_ptr):
         self._api.subscribe(self._id , self._pin, CONF_COVER , update_fun_ptr)
 

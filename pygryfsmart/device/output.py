@@ -12,6 +12,11 @@ class GryfOutput(_GryfDevice):
         api: GryfApi,
         update_fun_ptr=None,
     ):
+        self._attributes = {
+            "id": id,
+            "pin": pin,
+        }
+
         super().__init__(name,
                          id,
                          pin,
