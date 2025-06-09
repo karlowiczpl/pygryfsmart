@@ -65,8 +65,14 @@ class GryfThermostat(_GryfDevice):
     def enable(self , enable):
         self._enable = enable
 
-    def set_target_temperature(self , temperature):
+    async def set_target_temperature(self , temperature):
         self._target_temperature = temperature
+
+        if self._enable:
+            if self._t_state > self._target_temperature + self._differential:
+                await self._api.set_out(self._id , self._pin , OUTPUT_STATES.OFF)
+            elif self._t_state < self._target_temperature - self._differential: 
+                await self._api.set_out(self._id , self._pin , OUTPUT_STATES.ON)
 
     async def update_out(self , state):
         self._o_state = state
@@ -82,3 +88,5 @@ class GryfThermostat(_GryfDevice):
     def name(self):
         return f"{self._name}"
 
+    def change_differential(self, new_differential):
+        self._differential = new_differential
