@@ -31,7 +31,12 @@ class Feedback:
         try:
             for sub in self._subscribers:
                 if function == sub[CONF_FUNCTION]:
-                    await sub[CONF_PTR](self._data.get(function , {}).get(sub.get(CONF_ID) , {}).get(sub.get(CONF_PIN) , 0))
+
+                    all = self._data[function]
+                    current_id = all.get(sub.get(CONF_ID), {})
+                    state = current_id[sub[CONF_PIN]]
+
+                    await sub[CONF_PTR](state)
         except Exception as e:
             _LOGGER.error(f"Error subscriber {e}")
 
