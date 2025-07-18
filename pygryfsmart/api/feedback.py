@@ -27,18 +27,35 @@ class Feedback:
     def data(self):
         return self._data
 
-    async def handle_subscribtion(self , function: str):
+    # async def handle_subscribtion(self , function: str):
+    #     try:
+    #         for sub in self._subscribers:
+    #             if function == sub[CONF_FUNCTION]:
+    #
+    #                 all = self._data[function]
+    #                 current_id = all.get(sub.get(CONF_ID), {})
+    #                 state = current_id[sub[CONF_PIN]]
+    #
+    #                 await sub[CONF_PTR](state)
+    #     except Exception as e:
+    #         _LOGGER.error(f"Error subscriber {e}")
+
+    async def handle_subscribtion(self, function: str, id: int, pin: int):
         try:
+            driver_states = self._data[function][id]
+
             for sub in self._subscribers:
-                if function == sub[CONF_FUNCTION]:
+                if function == sub[CONF_FUNCTION] and id == sub[CONF_ID]:
 
-                    all = self._data[function]
-                    current_id = all.get(sub.get(CONF_ID), {})
-                    state = current_id[sub[CONF_PIN]]
+                    _LOGGER.error("dupa")
 
-                    await sub[CONF_PTR](state)
+                    state = driver_states[id]
+
+                    ptr = sub.get(CONF_PTR)
+                    await ptr(state)
+
         except Exception as e:
-            _LOGGER.error(f"Error subscriber {e}")
+            _LOGGER.exception(f"Error in subscriber: {e}")
 
     async def handle_temp_subscribtion(self , id: int , pin: int):
         pass

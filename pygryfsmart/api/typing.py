@@ -2,6 +2,7 @@ from .const import DriverFunctions
 
 import logging
 from datetime import datetime, timedelta
+from typing import Dict, TypedDict, Any
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -38,7 +39,8 @@ class DriverPingInfo:
     def __repr__(self):
         return f"{self._last_update},{self._mac_adress},{self._driver_model}"
 
-class GryfData(dict):
+class GryfData(Dict):
+
     _drivers = []
 
     _key_list = [
