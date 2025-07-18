@@ -38,9 +38,6 @@ class _GryfFunctionsApiBase(_GryfCommunicationApiBase):
         command = f"{DriverActions.SET_OUT}={id}," + ",".join(states) + "\n\r"
         await self.send_data(command)
 
-        command = f"{DriverActions.GET_OUT_STATE}={id}\n\r"
-        await self.send_data(command)
-
     async def set_key_time(
             self,
             ps_time: int,

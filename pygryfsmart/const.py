@@ -1,10 +1,16 @@
 from enum import IntEnum
 
-BAUDRATE = 115200
+BAUDRATE = 115200 
 PORT = 4510
 
+class OutputStates(IntEnum):
+    """Enum with output states."""
+
+    ON = 1
+    OFF = 0
+
 class OutputActions(IntEnum):
-    """Enum with Output states."""
+    """Enum with Output actions."""
 
     ON = 1
     OFF = 2

@@ -2,7 +2,7 @@ import asyncio
 import logging
 
 from pygryfsmart import GryfApi
-from pygryfsmart.const import OUTPUT_STATES
+from pygryfsmart.const import OutputActions, OutputStates
 from pygryfsmart.device import GryfOutput
 from pygryfsmart.device.output_line import GryfOutputLine
 
@@ -23,7 +23,8 @@ async def main():
     You can use serial connection(provide as an argument port) or using network (provide ip).
     """
 
-    network_api = GryfApi("192.168.40.95") 
+    # network_api = GryfApi("192.168.40.95") 
+    network_api = GryfApi("31.186.217.232")
     serial_api = GryfApi("/dev/ttyUSB0")
 
     await network_api.start_connection()
@@ -38,15 +39,15 @@ async def main():
     id_out = 1
     pin_out = 1
 
-    await network_api.set_out(id_out , pin_out , OUTPUT_STATES.ON)
+    await network_api.set_out(id_out , pin_out , OutputActions.ON)
 
     await asyncio.sleep(1)
 
-    await network_api.set_out(id_out , pin_out , OUTPUT_STATES.OFF)
+    await network_api.set_out(id_out , pin_out , OutputActions.OFF)
 
     await asyncio.sleep(1)
 
-    await network_api.set_out(id_out , pin_out , OUTPUT_STATES.TOGGLE)
+    await network_api.set_out(id_out , pin_out , OutputActions.TOGGLE)
 
     """Creating devices"""
     """
