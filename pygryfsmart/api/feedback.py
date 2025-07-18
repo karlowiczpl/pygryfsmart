@@ -1,41 +1,24 @@
 from .const import (
-    COMMAND_FUNCTION_IN,
-    COMMAND_FUNCTION_OUT,
-    COMMAND_FUNCTION_PWM,
-    COMMAND_FUNCTION_COVER,
-    COMMAND_FUNCTION_FIND,
-    COMMAND_FUNCTION_PONG,
-    COMMAND_FUNCTION_PRESS_SHORT,
-    COMMAND_FUNCTION_PRESS_LONG,
-    COMMAND_FUNCTION_TEMP,
-
     CONF_ID,
     CONF_PIN,
     CONF_PTR,
     CONF_FUNCTION,
+    DriverFunctions,
 )
 from .parsing import Parser
+from .typing import GryfData
 
 import logging
-
 
 _LOGGER = logging.getLogger(__name__)
 
 class Feedback:
 
     _parser: Parser
+    _data = GryfData()
 
     def __init__(self , callback=None) -> None:
         self.callback = callback
-        self._data = {
-            COMMAND_FUNCTION_IN: {},
-            COMMAND_FUNCTION_OUT: {},
-            COMMAND_FUNCTION_PWM: {},
-            COMMAND_FUNCTION_COVER: {},
-            COMMAND_FUNCTION_FIND: {},
-            COMMAND_FUNCTION_PONG: {},
-            COMMAND_FUNCTION_TEMP: {},
-        }
         self._subscribers = []
         self._temp_subscribers = []
         self._parser = Parser(self)
@@ -56,7 +39,7 @@ class Feedback:
         pass
         for sub in self._temp_subscribers:
             if id == sub[CONF_ID] and pin == sub[CONF_PIN]:
-                await sub[CONF_PTR](self._data.get(COMMAND_FUNCTION_TEMP , {}).get(id , {}).get(pin , 0))
+                await sub[CONF_PTR](self._data.temps).get(id, {}).get(pin, 0)
 
 
     async def input_data(self , line):
@@ -69,15 +52,15 @@ class Feedback:
             parsed_states[-1] = last_state[0]
 
             COMMAND_MAPPER = {
-                COMMAND_FUNCTION_IN: lambda states , line : self._parser.parse_metod_1(states , line , COMMAND_FUNCTION_IN),
-                COMMAND_FUNCTION_OUT: lambda states , line : self._parser.parse_metod_1(states , line , COMMAND_FUNCTION_OUT),
-                COMMAND_FUNCTION_PRESS_SHORT: lambda states , line : self._parser.parse_metod_2(states , line , COMMAND_FUNCTION_IN , 2),
-                COMMAND_FUNCTION_PRESS_LONG: lambda states , line : self._parser.parse_metod_2(states , line , COMMAND_FUNCTION_IN , 3),
-                COMMAND_FUNCTION_TEMP: lambda states , line : self._parser.parse_temp(states , line),
-                COMMAND_FUNCTION_PWM: lambda states , line : self._parser.parse_metod_3(states , line , COMMAND_FUNCTION_PWM),
-                COMMAND_FUNCTION_COVER: lambda states , line : self._parser.parse_cover(states , line , COMMAND_FUNCTION_COVER),
-                COMMAND_FUNCTION_FIND: lambda states , line: self._parser.parse_find(states),
-                COMMAND_FUNCTION_PONG: lambda states , line: self._parser.parse_pong(states),
+                DriverFunctions.INPUTS: lambda states , line : self._parser.parse_metod_1(states , line , DriverFunctions.INPUTS),
+                DriverFunctions.OUTPUTS: lambda states , line : self._parser.parse_metod_1(states , line , DriverFunctions.OUTPUTS),
+                DriverFunctions.PRESS_SHORT: lambda states , line : self._parser.parse_metod_2(states , line , DriverFunctions.INPUTS , 2),
+                DriverFunctions.PRESS_LONG: lambda states , line : self._parser.parse_metod_2(states , line , DriverFunctions.INPUTS , 3),
+                DriverFunctions.TEMP: lambda states , line : self._parser.parse_temp(states , line),
+                DriverFunctions.PWM: lambda states , line : self._parser.parse_metod_3(states , line , DriverFunctions.PWM),
+                DriverFunctions.COVER: lambda states , line : self._parser.parse_cover(states , line , DriverFunctions.COVER),
+                DriverFunctions.FIND: lambda states , line: self._parser.parse_find(states),
+                DriverFunctions.PONG: lambda states , line: self._parser.parse_pong(states),
             }
 
             if str(parts[0]).upper() in COMMAND_MAPPER:

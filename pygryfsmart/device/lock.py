@@ -1,4 +1,4 @@
-from pygryfsmart.const import CONF_IN, CONF_OUT, OUTPUT_STATES
+from pygryfsmart.const import OutputActions, DriverFunctions
 from pygryfsmart import GryfApi
 
 from .base import _GryfDevice
@@ -72,16 +72,16 @@ class GryfLock(_GryfDevice):
   def subscribe(self, update_fun_ptr):
     self._update_fun_ptr = update_fun_ptr
 
-    self._api.subscribe(self._id, self._pin, CONF_OUT, self.update_out)
+    self._api.subscribe(self._id, self._pin, DriverFunctions.OUTPUTS, self.update_out)
     if self._in_en:
-      self._api.subscribe(self._in_id, self._in_pin, CONF_IN, self.async_update_in)
+      self._api.subscribe(self._in_id, self._in_pin, DriverFunctions.INPUTS, self.async_update_in)
 
   @property
   def output_enable(self):
     return self._in_en
 
   async def turn_on(self):
-    await self._api.set_out(self._id, self._pin, OUTPUT_STATES.ON)
+    await self._api.set_out(self._id, self._pin, OutputActions.ON)
 
   async def turn_off(self):
     await self._api.set_out(self._id, self._pin, OUTPUT_STATES.OFF)

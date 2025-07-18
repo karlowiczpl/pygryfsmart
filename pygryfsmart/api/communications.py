@@ -10,12 +10,11 @@ from .tcp import TCPClientHandler
 from .feedback import Feedback
 from .gryf_expert import GryfExpert
 from .const import (
-        COMMAND_FUNCTION_GET_IN_STATE,
-        COMMAND_FUNCTION_GET_OUT_STATE,
-        COMMAND_FUNCTION_PONG,
-        BAUDRATE,
-        PORT,
-        )
+    BAUDRATE,
+    PORT,
+    DriverFunctions,
+    DriverActions,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -26,6 +25,7 @@ class _GryfCommunicationApiBase():
     _module_count = 1
     _gryf_expert: GryfExpert
     feedback: Feedback
+    _update_state_enable = True
 
 
     def __init__(
@@ -125,13 +125,14 @@ class _GryfCommunicationApiBase():
         try:
             while True:
                 line = await self._writer.read_data()
-                commands = line.splitlines()
+                if line:
+                    commands = line.splitlines()
 
-                for cmd in commands:
-                    await self.feedback.input_data(cmd)
-                    if self._input_message_subscribers:
-                        for subscribers in self._input_message_subscribers:
-                            await subscribers(cmd)
+                    for cmd in commands:
+                        await self.feedback.input_data(cmd)
+                        if self._input_message_subscribers:
+                            for subscribers in self._input_message_subscribers:
+                                await subscribers(cmd)
         except asyncio.CancelledError:
             _LOGGER.info("Connection task cancelled.")
             await self._writer.close_connection()
@@ -169,11 +170,19 @@ class _GryfCommunicationApiBase():
 
                 for i in range(self._module_count):
                     try:
-                        command = f"{COMMAND_FUNCTION_GET_IN_STATE}={i + 1}\n\r"
+                        if not self._update_state_enable:
+                            await asyncio.sleep(20)
+                            self._update_state_enable = True
+
+                        command = f"{DriverActions.GET_IN_STATE}={i + 1}\n\r"
                         await self.send_data(command)
                         await asyncio.sleep(0.1)
 
-                        command = f"{COMMAND_FUNCTION_GET_OUT_STATE}={i + 1}\n\r"
+                        if not self._update_state_enable:
+                            await asyncio.sleep(5)
+                            self._update_state_enable = True
+
+                        command = f"{DriverActions.GET_OUT_STATE}={i + 1}\n\r"
                         await self.send_data(command)
                         await asyncio.sleep(5)
                     except Exception as e:
@@ -192,7 +201,7 @@ class _GryfCommunicationApiBase():
         ) -> bool:
         """Check driver available."""
 
-        last_call = self.feedback.data[COMMAND_FUNCTION_PONG].get(id , None)
+        last_call = self.feedback.data.pongs.get(id , None)
         now = datetime.now()
         current_time = now.strftime("%H:%M")
 

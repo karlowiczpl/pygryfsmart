@@ -1,20 +1,12 @@
 """File with GryfApi driver functions."""
 
 from .const import (
-    KEY_MODE,
-    OUTPUT_STATES,
-    SCHUTTER_STATES,
-
-    COMMAND_FUNCTION_IN,
-    COMMAND_FUNCTION_OUT,
-
-    COMMAND_FUNCTION_SET_OUT,
-    COMMAND_FUNCTION_SET_COVER,
-    COMMAND_FUNCTION_SET_PWM,
-    COMMAND_FUNCTION_PING,
-    COMMAND_FUNCTION_SET_PRESS_TIME,
-    COMMADN_FUNCTION_SEARCH_MODULE,
-    COMMAND_FUNCTION_GET_OUT_STATE,
+    DriverFunctions,
+    OutputActions,
+    DriverActions,
+    KeyModes,
+    ConfigurationFunctions,
+    ShutterStates,
 )
 from .communications import _GryfCommunicationApiBase
 
@@ -36,17 +28,17 @@ class _GryfFunctionsApiBase(_GryfCommunicationApiBase):
             self,
             id: int,
             pin: int,
-            state: OUTPUT_STATES | int
+            state: OutputActions | int
         ) -> None:
         """Set driver output state."""
 
         states = ["0"] * 8 if pin > 6 else ["0"] * 6
         states[pin - 1] = str(state)
 
-        command = f"{COMMAND_FUNCTION_SET_OUT}={id}," + ",".join(states) + "\n\r"
+        command = f"{DriverActions.SET_OUT}={id}," + ",".join(states) + "\n\r"
         await self.send_data(command)
 
-        command = f"{COMMAND_FUNCTION_GET_OUT_STATE}={id}\n\r"
+        command = f"{DriverActions.GET_OUT_STATE}={id}\n\r"
         await self.send_data(command)
 
     async def set_key_time(
@@ -55,11 +47,11 @@ class _GryfFunctionsApiBase(_GryfCommunicationApiBase):
             pl_time: int,
             id: int,
             pin: int,
-            type: KEY_MODE | int
+            type: KeyModes | int
         ) -> None:
         """Set target short and long press time for driver input."""
 
-        command = f"{COMMAND_FUNCTION_SET_PRESS_TIME}={id},{pin},{ps_time},{pl_time},{type}\n\r"
+        command = f"{ConfigurationFunctions.SET_PRESS_TIME}={id},{pin},{ps_time},{pl_time},{type}\n\r"
         await self.send_data(command)
 
     async def ping_connection(self) -> bool:
@@ -74,7 +66,7 @@ class _GryfFunctionsApiBase(_GryfCommunicationApiBase):
         """Get model off current driver."""
 
         if id != 0:
-            command = f"{COMMADN_FUNCTION_SEARCH_MODULE}=0,{id}\n\r"
+            command = f"{DriverActions.SEARCH}=0,{id}\n\r"
             await self.send_data(command)
         else:
             await self.search_modules()
@@ -86,12 +78,12 @@ class _GryfFunctionsApiBase(_GryfCommunicationApiBase):
         """Get model off current drivers."""
 
         if last_module == None:
-            module_count = max(len(self.feedback.data[COMMAND_FUNCTION_IN]), len(self.feedback.data[COMMAND_FUNCTION_OUT]))
+            module_count = max(len(self.feedback.data[DriverFunctions.INPUTS]), len(self.feedback.data[DriverFunctions.OUTPUTS]))
         else:
             module_count = last_module
 
         for i in range(module_count):
-            command = f"{COMMADN_FUNCTION_SEARCH_MODULE}=0,{i + 1}\n\r"
+            command = f"{DriverActions.SEARCH}=0,{i + 1}\n\r"
             await self.send_data(command)
 
     async def ping(
@@ -100,7 +92,7 @@ class _GryfFunctionsApiBase(_GryfCommunicationApiBase):
         ) -> bool:
         """Ping single driver."""
         
-        command = f"{COMMAND_FUNCTION_PING}={module_id}\n\r"
+        command = f"{DriverActions.PING}={module_id}\n\r"
         await self.send_data(command)
         await asyncio.sleep(0.05)
         if self._last_ping == module_id:
@@ -117,7 +109,7 @@ class _GryfFunctionsApiBase(_GryfCommunicationApiBase):
         ) -> None:
         """Set current driver pwm output level."""
 
-        command = f"{COMMAND_FUNCTION_SET_PWM}={id},{pin},{level}\n\r"
+        command = f"{DriverActions.SET_PWM}={id},{pin},{level}\n\r"
         await self.send_data(command)
 
     async def set_cover(
@@ -125,19 +117,32 @@ class _GryfFunctionsApiBase(_GryfCommunicationApiBase):
             id: int,
             pin: int,
             time: int,
-            operation: SCHUTTER_STATES | int
+            operation: ShutterStates | int
         ) -> None:
         """Set current driver cover output state."""
 
-        if operation in {SCHUTTER_STATES.CLOSE , SCHUTTER_STATES.OPEN , SCHUTTER_STATES.STOP , SCHUTTER_STATES.STEP_MODE} and pin in {1 , 2 , 3 , 4}:
+        if operation in {ShutterStates.CLOSE , ShutterStates.OPEN , ShutterStates.STOP , ShutterStates.STEP_MODE} and pin in {1 , 2 , 3 , 4}:
             states = ["0"] * 4
             states[pin - 1] = str(operation)
             control_sum = id + time + int(states[0]) + int(states[1]) + int(states[2]) + int(states[3])
 
-            command = f"{COMMAND_FUNCTION_SET_COVER}={id},{time},{states[0]},{states[1]},{states[2]},{states[3]},{control_sum}\n\r"
+            command = f"{DriverActions.SET_COVER}={id},{time},{states[0]},{states[1]},{states[2]},{states[3]},{control_sum}\n\r"
             await self.send_data(command)
         else:
             raise ValueError(f"Argument out of scope: id: {id} , pin: {pin} , time: {time}, operation: {operation}")
+
+    async def async_update_states(self):
+        output_states = self.feedback.data.outputs
+
+        for index, data in output_states.items():
+            states = []
+            for x, item in data.items():
+                states.append(item)
+
+            command = f"{DriverActions.SET_OUT}={index}," + ",".join(str(i) for i in states) + "\n\r"
+
+            await self.send_data(command)
+            await asyncio.sleep(0.5)
 
     async def reset(
             self,
@@ -149,12 +154,8 @@ class _GryfFunctionsApiBase(_GryfCommunicationApiBase):
         if module_id == 0:
             command = "AT+RST=0\n\r"
             await self.send_data(command)
+
             if update_states == True:
-                module_count = len(self.feedback.data[COMMAND_FUNCTION_OUT])
-                await asyncio.sleep(2)
-                states = self.feedback.data[COMMAND_FUNCTION_OUT]
-                for i in range(module_count):
-                    tabble = list(self.feedback.data[COMMAND_FUNCTION_OUT][i+1].values())
-                    states = ",".join(map(str, tabble))
-                    command = f"AT+SetOut={i+1},{states}\n\r"
-                    await self.send_data(command)
+                await asyncio.sleep(3)
+
+                await self.async_update_states()

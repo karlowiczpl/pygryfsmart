@@ -1,5 +1,5 @@
 from pygryfsmart import GryfApi
-from pygryfsmart.const import CONF_IN
+from pygryfsmart.const import DriverFunctions
 
 from .base import _GryfDevice
 
@@ -17,10 +17,10 @@ class GryfInput(_GryfDevice):
                          pin,
                          api)
         if callback is not None:
-            self._api.subscribe(self._id , self._pin , CONF_IN , callback)
+            self._api.subscribe(self._id , self._pin , DriverFunctions.INPUTS , callback)
 
     def subscribe(self , update_fun_ptr):
-        self._api.subscribe(self._id , self._pin, CONF_IN , update_fun_ptr)
+        self._api.subscribe(self._id , self._pin, DriverFunctions.INPUTS , update_fun_ptr)
 
     @property
     def name(self):

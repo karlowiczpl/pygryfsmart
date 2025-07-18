@@ -1,5 +1,5 @@
 from pygryfsmart import GryfApi
-from pygryfsmart.const import CONF_PWM
+from pygryfsmart.const import DriverFunctions
 
 from .base import _GryfDevice
 
@@ -29,10 +29,10 @@ class GryfPwm(_GryfDevice):
         self._last_level = 0
         self._is_on = False
         if callback is not None:
-            self._api.subscribe(self._id , self._pin , CONF_PWM , callback)
+            self._api.subscribe(self._id , self._pin , DriverFunctions.PWM , callback)
 
     def subscribe(self , update_fun_ptr):
-        self._api.subscribe(self._id , self._pin, CONF_PWM , update_fun_ptr)
+        self._api.subscribe(self._id , self._pin, DriverFunctions.PWM , update_fun_ptr)
 
     async def set_level(self , level: int):
         if level > 0:

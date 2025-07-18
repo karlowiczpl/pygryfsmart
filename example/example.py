@@ -23,7 +23,7 @@ async def main():
     You can use serial connection(provide as an argument port) or using network (provide ip).
     """
 
-    network_api = GryfApi("192.168.0.95") 
+    network_api = GryfApi("192.168.40.95") 
     serial_api = GryfApi("/dev/ttyUSB0")
 
     await network_api.start_connection()

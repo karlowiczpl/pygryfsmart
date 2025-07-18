@@ -106,7 +106,7 @@ class GryfExpert:
         self.server_task = asyncio.create_task(self.server.serve_forever())
 
     @property
-    def enable(self) -> bool:
+    def enable(self):
         """Return is server enable."""
         return self._enable
 

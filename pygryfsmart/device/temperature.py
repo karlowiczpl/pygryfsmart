@@ -1,5 +1,5 @@
 from pygryfsmart import GryfApi
-from pygryfsmart.const import CONF_TEMP
+from pygryfsmart.const import DriverFunctions
 
 from .base import _GryfDevice
 
@@ -22,10 +22,10 @@ class GryfTemperature(_GryfDevice):
                          pin, 
                          api)
         if callback is not None:
-            self._api.subscribe(self._id , self._pin , CONF_TEMP , callback)
+            self._api.subscribe(self._id , self._pin , DriverFunctions.TEMP , callback)
 
     def subscribe(self , update_fun_ptr):
-        self._api.subscribe(self._id , self._pin, CONF_TEMP , update_fun_ptr)
+        self._api.subscribe(self._id , self._pin, DriverFunctions.TEMP , update_fun_ptr)
 
     @property
     def name(self):

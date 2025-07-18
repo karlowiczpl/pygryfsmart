@@ -1,4 +1,4 @@
-from pygryfsmart.const import CONF_OUT , OUTPUT_STATES
+from pygryfsmart.const import OutputActions, DriverFunctions
 from pygryfsmart import GryfApi
 
 from .base import _GryfDevice
@@ -22,20 +22,20 @@ class GryfOutput(_GryfDevice):
                          pin,
                          api)
         if update_fun_ptr:
-            self._api.subscribe(self._id , self._pin , CONF_OUT , update_fun_ptr)
+            self._api.subscribe(self._id , self._pin , DriverFunctions.OUTPUTS , update_fun_ptr)
 
     def subscribe(self , update_fun_ptr):
-        self._api.subscribe(self._id , self._pin, CONF_OUT , update_fun_ptr)
+        self._api.subscribe(self._id , self._pin, DriverFunctions.OUTPUTS , update_fun_ptr)
 
     @property
     def name(self):
         return f"{self._name}"
 
     async def turn_on(self):
-        await self._api.set_out(self._id, self._pin, OUTPUT_STATES.ON)
+        await self._api.set_out(self._id, self._pin, OutputActions.ON)
 
     async def turn_off(self):
-        await self._api.set_out(self._id, self._pin, OUTPUT_STATES.OFF)
+        await self._api.set_out(self._id, self._pin, OutputActions.OFF)
 
     async def toggle(self):
-        await self._api.set_out(self._id, self._pin, OUTPUT_STATES.TOGGLE)
+        await self._api.set_out(self._id, self._pin, OutputActions.TOGGLE)

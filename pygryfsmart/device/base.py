@@ -1,4 +1,4 @@
-from pygryfsmart.const import CONF_PONG
+from pygryfsmart.const import DriverFunctions
 from pygryfsmart import GryfApi
 
 from datetime import datetime
@@ -22,7 +22,7 @@ class _GryfDevice:
         self._api = api
 
         now = datetime.now()
-        self._api.feedback.data[CONF_PONG][self._id] = now.strftime("%H:%M") 
+        self._api.feedback.data[DriverFunctions.PONG][self._id] = now.strftime("%H:%M") 
 
     @property
     def available(self):

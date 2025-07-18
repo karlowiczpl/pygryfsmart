@@ -1,5 +1,5 @@
 from pygryfsmart import GryfApi
-from pygryfsmart.const import SCHUTTER_STATES
+from pygryfsmart.const import ShutterStates
 
 import asyncio
 import logging
@@ -38,20 +38,20 @@ class GryfPCover(_GryfDevice):
         self._timer_task = None
         self._opening_postion = 0
         self._opening_postion_en = False
-        self._operation = SCHUTTER_STATES.STOP
+        self._operation = ShutterStates.STOP
         self._time_to_sleep = 0.0
 
     async def turn_on(self):
-        await self._api.set_cover(self._id , self._pin , self._opening_time , SCHUTTER_STATES.OPEN)
+        await self._api.set_cover(self._id , self._pin , self._opening_time , ShutterStates.OPEN)
 
     async def turn_off(self):
-        await self._api.set_cover(self._id , self._pin , self._opening_time , SCHUTTER_STATES.CLOSE)
+        await self._api.set_cover(self._id , self._pin , self._opening_time , ShutterStates.CLOSE)
 
     async def toggle(self):
-        await self._api.set_cover(self._id , self._pin , self._opening_time , SCHUTTER_STATES.STEP_MODE)
+        await self._api.set_cover(self._id , self._pin , self._opening_time , ShutterStates.STEP_MODE)
 
     async def stop(self):
-        await self._api.set_cover(self._id , self._pin , 0, SCHUTTER_STATES.STOP)
+        await self._api.set_cover(self._id , self._pin , 0, ShutterStates.STOP)
 
     async def __timer(self):
         self._timer_en = True
@@ -88,7 +88,7 @@ class GryfPCover(_GryfDevice):
         self._opening_postion_en = False
 
     async def __send_postion_to_move(self):
-        self._operation = SCHUTTER_STATES.OPEN if self._current_postion < self._expected_postion else SCHUTTER_STATES.CLOSE
+        self._operation = ShutterStates if self._current_postion < self._expected_postion else ShutterStates.CLOSE
         time_to_move = int((abs(self._current_postion - self._expected_postion) * self._opening_time) / 100)
 
         await self._api.set_cover(self._id , self._pin , time_to_move , self._operation)

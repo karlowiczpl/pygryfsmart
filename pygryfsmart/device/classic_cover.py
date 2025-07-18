@@ -1,5 +1,6 @@
 from pygryfsmart import GryfApi
-from pygryfsmart.const import CONF_COVER , SCHUTTER_STATES
+from pygryfsmart.const import ShutterStates, DriverFunctions
+
 from .base import _GryfDevice
 
 class GryfCover(_GryfDevice):
@@ -26,20 +27,20 @@ class GryfCover(_GryfDevice):
         }
 
     def subscribe(self , update_fun_ptr):
-        self._api.subscribe(self._id , self._pin, CONF_COVER , update_fun_ptr)
+        self._api.subscribe(self._id , self._pin, DriverFunctions.COVER , update_fun_ptr)
 
     @property
     def name(self):
         return f"{self._name}"
 
     async def turn_on(self):
-        await self._api.set_cover(self._id , self._pin , self._time , SCHUTTER_STATES.OPEN)
+        await self._api.set_cover(self._id , self._pin , self._time , ShutterStates.OPEN)
 
     async def turn_off(self):
-        await self._api.set_cover(self._id , self._pin , self._time , SCHUTTER_STATES.CLOSE)
+        await self._api.set_cover(self._id , self._pin , self._time , ShutterStates.CLOSE)
 
     async def toggle(self):
-        await self._api.set_cover(self._id , self._pin , self._time , SCHUTTER_STATES.STEP_MODE)
+        await self._api.set_cover(self._id , self._pin , self._time , ShutterStates.STEP_MODE)
 
     async def stop(self):
-        await self._api.set_cover(self._id , self._pin , self._time , SCHUTTER_STATES.STOP)
+        await self._api.set_cover(self._id , self._pin , self._time , ShutterStates.STOP)

@@ -3,16 +3,12 @@
 from .functions import _GryfFunctionsApiBase
 from .gryf_expert import GryfExpert
 from .const import(
-        COMMAND_FUNCTION_IN,
-        COMMAND_FUNCTION_TEMP,
-        COMMAND_FUNCTION_OUT,
-        COMMAND_FUNCTION_PWM,
-        COMMAND_FUNCTION_COVER,
-        CONF_ID,
-        CONF_PIN,
-        CONF_PTR,
-        CONF_FUNCTION,
-        DriverFunctions,
+    CONF_ID,
+    CONF_PIN,
+    CONF_PTR,
+    CONF_FUNCTION,
+    DriverFunctions,
+    subscriptable_function,
         )
 import logging
 _LOGGER = logging.getLogger(__name__)
@@ -49,20 +45,27 @@ class GryfApi(_GryfFunctionsApiBase):
         ) -> None:
         """Subscribe feedback from drivers."""
 
-        if func in {COMMAND_FUNCTION_IN,
-                    COMMAND_FUNCTION_OUT,
-                    COMMAND_FUNCTION_TEMP,
-                    COMMAND_FUNCTION_PWM,
-                    COMMAND_FUNCTION_COVER}:
+        if func in subscriptable_function:
+
             data = {
                 CONF_ID: id,
                 CONF_PIN: pin,
                 CONF_FUNCTION: func,
                 CONF_PTR: ptr
             }
-            if func != COMMAND_FUNCTION_TEMP:
+            if func != DriverFunctions.TEMP:
                 self.feedback.subscribe(data)
             else:
                 self.feedback.subscribe_temp(data)
         else:
             _LOGGER.error(f"Bad function to subscribe: {func}")
+
+    def realize_function_from_arguments(
+        self,
+        function: str,
+        id: int,
+        extra: int,
+        state: int,
+    ) -> None:
+        pass
+
