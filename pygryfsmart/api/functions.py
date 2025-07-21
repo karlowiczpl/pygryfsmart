@@ -156,3 +156,15 @@ class _GryfFunctionsApiBase(_GryfCommunicationApiBase):
                 await asyncio.sleep(3)
 
                 await self.async_update_states()
+
+    async def update_inputs_info(self, driver_num: int):
+
+        command = f"{DriverActions.GET_IN_STATE}={driver_num}"
+
+        await self.send_data(command)
+
+    async def update_outputs_info(self, driver_num: int):
+
+        command = f"{DriverActions.GET_OUT_STATE}={driver_num}"
+
+        await self.send_data(command)

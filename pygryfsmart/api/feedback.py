@@ -9,6 +9,7 @@ from .parsing import Parser
 from .typing import GryfData
 
 import logging
+import traceback
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -27,13 +28,27 @@ class Feedback:
     def data(self):
         return self._data
 
-    async def handle_subscribtion(self , function: str):
-        try:
-            for sub in self._subscribers:
-                if function == sub[CONF_FUNCTION]:
-                    await sub[CONF_PTR](self._data.get(function , {}).get(sub.get(CONF_ID) , {}).get(sub.get(CONF_PIN) , 0))
-        except Exception as e:
-            _LOGGER.error(f"Error subscriber {e}")
+    async def handle_subscribtion(self , function: str, id=0):
+        if id == 0:
+            try:
+                for sub in self._subscribers:
+                    if function == sub[CONF_FUNCTION]:
+                        await sub[CONF_PTR](self._data.get(function , {}).get(sub.get(CONF_ID) , {}).get(sub.get(CONF_PIN) , 0))
+            except Exception as e:
+                _LOGGER.error(f"Error subscriber 1: {e}")
+        else:
+            try:
+                for sub in self._subscribers:
+
+
+                    if function == sub[CONF_FUNCTION] and id == sub[CONF_ID]:
+                        driver_states = self._data[function][sub.get(CONF_ID)]
+
+                        await sub[CONF_PTR](driver_states[sub[CONF_PIN]])
+
+            except Exception as e:
+                _LOGGER.error(f"Error subscriber 2: {e} (type: {type(e)})")
+                _LOGGER.error(traceback.format_exc())
 
     async def handle_temp_subscribtion(self , id: int , pin: int):
         pass
