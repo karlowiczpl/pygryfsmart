@@ -52,12 +52,9 @@ class GryfOutput(_GryfDevice):
         return self._state
 
     async def turn_on(self):
-        trials = 0
-
         for k in range(10):
 
             self._feedback_update = 0
-            trials += 1
             await self._api.set_out(self._id, self._pin, OutputActions.ON)
 
             for i in range(10):
@@ -65,18 +62,15 @@ class GryfOutput(_GryfDevice):
                 if self._feedback_update:
                     break
                 
-                await asyncio.sleep(0.01)
+                await asyncio.sleep(k * 0.01)
             
             if self._state == 1:
                 break
 
     async def turn_off(self):
-        trials = 0
-
         for k in range(10):
 
             self._feedback_update = 0
-            trials += 1
             await self._api.set_out(self._id, self._pin, OutputActions.OFF)
 
             for i in range(10):
@@ -84,7 +78,7 @@ class GryfOutput(_GryfDevice):
                 if self._feedback_update:
                     break
                 
-                await asyncio.sleep(0.01)
+                await asyncio.sleep(k * 0.01)
             
             if self._state == 0:
                 break
