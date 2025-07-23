@@ -51,10 +51,10 @@ class Feedback:
                 _LOGGER.error(traceback.format_exc())
 
     async def handle_temp_subscribtion(self , id: int , pin: int):
-        pass
         for sub in self._temp_subscribers:
             if id == sub[CONF_ID] and pin == sub[CONF_PIN]:
-                await sub[CONF_PTR](self._data.temps).get(id, {}).get(pin, 0)
+                data = self._data.temps.get(id, {}).get(pin)
+                await sub[CONF_PTR](data)
 
 
     async def input_data(self , line):
