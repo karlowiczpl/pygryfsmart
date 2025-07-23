@@ -9,6 +9,7 @@ from .parsing import Parser
 from .typing import GryfData
 
 import logging
+import traceback
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -27,41 +28,33 @@ class Feedback:
     def data(self):
         return self._data
 
-    # async def handle_subscribtion(self , function: str):
-    #     try:
-    #         for sub in self._subscribers:
-    #             if function == sub[CONF_FUNCTION]:
-    #
-    #                 all = self._data[function]
-    #                 current_id = all.get(sub.get(CONF_ID), {})
-    #                 state = current_id[sub[CONF_PIN]]
-    #
-    #                 await sub[CONF_PTR](state)
-    #     except Exception as e:
-    #         _LOGGER.error(f"Error subscriber {e}")
+    async def handle_subscribtion(self , function: str, id=0):
+        if id == 0:
+            try:
+                for sub in self._subscribers:
+                    if function == sub[CONF_FUNCTION]:
+                        await sub[CONF_PTR](self._data.get(function , {}).get(sub.get(CONF_ID) , {}).get(sub.get(CONF_PIN) , 0))
+            except Exception as e:
+                _LOGGER.error(f"Error subscriber 1: {e}")
+        else:
+            try:
+                for sub in self._subscribers:
 
-    async def handle_subscribtion(self, function: str, id: int, pin: int):
-        try:
-            driver_states = self._data[function][id]
 
-            for sub in self._subscribers:
-                if function == sub[CONF_FUNCTION] and id == sub[CONF_ID]:
+                    if function == sub[CONF_FUNCTION] and id == sub[CONF_ID]:
+                        driver_states = self._data[function][sub.get(CONF_ID)]
 
-                    _LOGGER.error("dupa")
+                        await sub[CONF_PTR](driver_states[sub[CONF_PIN]])
 
-                    state = driver_states[id]
-
-                    ptr = sub.get(CONF_PTR)
-                    await ptr(state)
-
-        except Exception as e:
-            _LOGGER.exception(f"Error in subscriber: {e}")
+            except Exception as e:
+                _LOGGER.error(f"Error subscriber 2: {e} (type: {type(e)})")
+                _LOGGER.error(traceback.format_exc())
 
     async def handle_temp_subscribtion(self , id: int , pin: int):
-        pass
         for sub in self._temp_subscribers:
             if id == sub[CONF_ID] and pin == sub[CONF_PIN]:
-                await sub[CONF_PTR](self._data.temps).get(id, {}).get(pin, 0)
+                data = self._data.temps.get(id, {}).get(pin)
+                await sub[CONF_PTR](data)
 
 
     async def input_data(self , line):
