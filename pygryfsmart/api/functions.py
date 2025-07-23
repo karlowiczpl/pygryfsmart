@@ -157,20 +157,6 @@ class _GryfFunctionsApiBase(_GryfCommunicationApiBase):
 
                 await self.async_update_states()
 
-<<<<<<< HEAD
-    async def async_get_states(self, last_module: int):
-        
-        for i in range(last_module):
-            command = f"{DriverActions.GET_OUT_STATE}={i}"
-            await self.send_data(command)
-
-            await asyncio.sleep(0.1)
-
-            command = f"{DriverActions.GET_IN_STATE}={i}"
-            await self.send_data(command)
-
-            await asyncio.sleep(0.1)
-=======
     async def update_inputs_info(self, driver_num: int):
 
         command = f"{DriverActions.GET_IN_STATE}={driver_num}"
@@ -182,4 +168,3 @@ class _GryfFunctionsApiBase(_GryfCommunicationApiBase):
         command = f"{DriverActions.GET_OUT_STATE}={driver_num}"
 
         await self.send_data(command)
->>>>>>> temp-branch
