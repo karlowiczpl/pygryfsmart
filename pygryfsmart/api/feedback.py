@@ -39,8 +39,6 @@ class Feedback:
         else:
             try:
                 for sub in self._subscribers:
-
-
                     if function == sub[CONF_FUNCTION] and id == sub[CONF_ID]:
                         driver_states = self._data[function][sub.get(CONF_ID)]
 
@@ -85,7 +83,8 @@ class Feedback:
                 await self.callback() 
 
         except Exception as e:
-            _LOGGER.error(f"ERROR parsing data: {e}")
+            _LOGGER.error(f"ERROR parsing data: {e} (type: {type(e)})")
+            _LOGGER.error(traceback.format_exc())
 
     def subscribe(self , conf: dict):
         self._subscribers.append(conf)

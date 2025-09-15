@@ -30,7 +30,7 @@ def start_timer():
     start_time = time.perf_counter()
 
 async def async_main():
-    api = GryfApi("31.186.217.232")
+    api = GryfApi("192.168.40.95")
     output = GryfOutput(
         "test",
         95,
@@ -43,21 +43,25 @@ async def async_main():
     counter = 1
 
     while 1:
-        global changed
-        changed = 1
-        start_timer()
-        
-        if counter:
-            await output.turn_on()
-            counter = 0
-        else:
-            await output.turn_off()
-            counter = 1
+        # global changed
+        # changed = 1
+        # start_timer()
+        # 
+        # if counter:
+        #     await output.turn_on()
+        #     counter = 0
+        # else:
+        #     await output.turn_off()
+        #     counter = 1
+        #
+        # while changed:
+        #     await asyncio.sleep(0.1)
+        #
+        # await asyncio.sleep(1)
+        for i in range(100):
+            await api.set_pwm(1, 2, i)
 
-        while changed:
-            await asyncio.sleep(0.1)
-
-        await asyncio.sleep(1)
+            await asyncio.sleep(0.01)
 
 if __name__ == "__main__":
     asyncio.run(async_main())

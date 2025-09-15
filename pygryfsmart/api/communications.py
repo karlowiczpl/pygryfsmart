@@ -35,6 +35,7 @@ class _GryfCommunicationApiBase():
         ) -> None:
         """Initialise GryfCommunication."""
 
+        self.port = port
         self._connection_task = None
         self._update_task = None
         self.feedback = Feedback(callback=callback)
@@ -167,7 +168,6 @@ class _GryfCommunicationApiBase():
 
         try:
             while True:
-
                 for i in range(self._module_count):
                     try:
                         if not self._update_state_enable:

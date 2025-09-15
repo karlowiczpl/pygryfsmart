@@ -11,6 +11,10 @@ class TCPClientHandler:
         self._writer = None
         self._reconnect_interval = 5
 
+    @property
+    def port(self):
+        return self._port
+
     async def open_connection(self):
         while True:
             try:

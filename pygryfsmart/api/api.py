@@ -9,8 +9,10 @@ from .const import(
     CONF_FUNCTION,
     DriverFunctions,
     subscriptable_function,
-        )
+)
+
 import logging
+
 _LOGGER = logging.getLogger(__name__)
 
 class GryfApi(_GryfFunctionsApiBase):

@@ -52,15 +52,15 @@ class GryfCover(_GryfDevice):
         for k in range(10):
             self._feedback_update = 0
             await self._api.set_cover(self._id , self._pin , self._time , ShutterStates.OPEN)
+
             for i in range(10):
                 if self._feedback_update:
-                    break;
+                    break
 
                 await asyncio.sleep(k * 10)
 
             if self._shutter_state == 1:
                 break
-        
 
     async def turn_off(self):
         for k in range(10):
@@ -68,15 +68,27 @@ class GryfCover(_GryfDevice):
             await self._api.set_cover(self._id , self._pin , self._time , ShutterStates.CLOSE)
             for i in range(10):
                 if self._feedback_update:
-                    break;
+                    break
 
                 await asyncio.sleep(k * 10)
 
-            if self._shutter_state == 0:
+            if self._shutter_state == 2:
                 break
 
     async def toggle(self):
-        await self._api.set_cover(self._id , self._pin , self._time , ShutterStates.STEP_MODE)
+        old_state = self._shutter_state
+
+        for k in range(10):
+            self._feedback_update = 0
+            await self._api.set_cover(self._id , self._pin , self._time , ShutterStates.STEP_MODE)
+            for i in range(10):
+                if self._feedback_update:
+                    break
+
+                await asyncio.sleep(k * 10)
+
+            if self._shutter_state != old_state:
+                break
 
     async def stop(self):
         await self._api.set_cover(self._id , self._pin , self._time , ShutterStates.STOP)

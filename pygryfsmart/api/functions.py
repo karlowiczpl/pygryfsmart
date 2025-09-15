@@ -102,11 +102,15 @@ class _GryfFunctionsApiBase(_GryfCommunicationApiBase):
             self,
             id: int,
             pin: int,
-            level: int
+            level: int,
+            extra: int=1,
         ) -> None:
         """Set current driver pwm output level."""
 
-        command = f"{DriverActions.SET_PWM}={id},{pin},{level}\n\r"
+        if extra:
+            command = f"{DriverActions.SET_PWM}={id},{pin},{level},1\n\r"
+        else:
+            command = f"{DriverActions.SET_PWM}={id},{pin},{level}\n\r"
         await self.send_data(command)
 
     async def set_cover(

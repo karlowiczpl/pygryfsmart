@@ -40,7 +40,7 @@ class GryfThermostat(_GryfDevice):
 
     def subscribe(self , update_fun_ptr):
         self._api.subscribe(self._id , self._pin, DriverFunctions.OUTPUTS , self.update_out)
-        self._api.subscribe(self._t_id , self._t_pin, DriverFunctions.OUTPUTS , self.update_temperature)
+        self._api.subscribe(self._t_id , self._t_pin, DriverFunctions.TEMP , self.update_temperature)
         self._update_fun_ptr = update_fun_ptr
 
     async def update_temperature(self , state):

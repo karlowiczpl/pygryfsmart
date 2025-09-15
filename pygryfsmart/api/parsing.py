@@ -18,15 +18,14 @@ class Parser:
         if len(parsed_states) not in {7 , 9}:
             raise ValueError(f"Invalid number of arguments: {line}")
 
-        id = 0
+        id = int(parsed_states[0])
+        if id not in self._data[function]:
+            self._data[function][id] = {}
+
         for i in range(1, len(parsed_states)):
             if parsed_states[i] not in {"0" , "1"}:
                 raise ValueError(f"Wrong parameter value: {line}")
-            self._data[function][id][i] = int(parsed_states[i])                   
 
-            id = int(parsed_states[0])
-            if id not in self._data[function]:
-                self._data[function][id] = {}
             self._data[function][id][i] = int(parsed_states[i])                   
         try:
             await self._feedback.handle_subscribtion(function, id=id)
@@ -58,7 +57,7 @@ class Parser:
             self._data[function][id] = {}
         self._data[function][id][pin] = parsed_states[2]
         try:
-            await self._feedback.handle_subscribtion(function, id, pin)
+            await self._feedback.handle_subscribtion(function, id)
         except Exception as e:
             _LOGGER.error(f"Error subscriber {e}")
 
