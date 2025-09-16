@@ -73,8 +73,13 @@ class Parser:
             if pin not in self._data[function]:
                 self._data[function][pin] = {}
             self._data[function][pin][i] = int(parsed_states[i])                   
+
+        id = int(parsed_states[0])
+
         try:
-            await self._feedback.handle_subscribtion(function, id, pin)
+            await self._feedback.handle_subscribtion(function, id)
+
+            _LOGGER.debug(f"function: {function}, id: {id}")
         except Exception as e:
             _LOGGER.error(f"Error subscriber {e}")
 

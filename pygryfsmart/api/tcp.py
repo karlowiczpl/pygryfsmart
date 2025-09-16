@@ -15,6 +15,7 @@ class TCPClientHandler:
     def port(self):
         return self._port
 
+
     async def open_connection(self):
         while True:
             try:
@@ -27,11 +28,18 @@ class TCPClientHandler:
 
     async def close_connection(self):
         if self._writer:
-            self._writer.close()
-            await self._writer.wait_closed()
-            _LOGGER.info("Connection closed.")
+            try:
+                self._writer.close()
+                await self._writer.wait_closed()
+                _LOGGER.info("Connection closed.")
+            except Exception as e:
+                _LOGGER.warning(f"Error while closing connection: {e}")
+            finally:
+                self._reader = None
+                self._writer = None
         else:
             _LOGGER.warning("No active connection to close.")
+
 
     async def send_data(self, data):
         if self._writer:
@@ -67,12 +75,12 @@ class TCPClientHandler:
             return ""
 
     async def reconnect(self):
-        try: 
-            self._writer = None
-            self._reader = None
-            await self.close_connection()
-            await self.open_connection()
-        except ConnectionResetError as e:
-            _LOGGER.error("Connection error: %s", e)
-            await asyncio.sleep(self._reconnect_interval)
-            await self.reconnect()
+        while True:
+            try:
+                await self.close_connection()
+                await self.open_connection()
+                return
+            except Exception as e:
+                _LOGGER.error(f"Reconnect failed: {e}")
+                await asyncio.sleep(self._reconnect_interval)
+

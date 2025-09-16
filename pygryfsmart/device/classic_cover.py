@@ -5,6 +5,10 @@ from pygryfsmart.const import ShutterStates, DriverFunctions
 
 from .base import _GryfDevice
 
+import logging
+
+_LOGGER = logging.getLogger(__name__)
+
 class GryfCover(_GryfDevice):
 
     def __init__(
@@ -44,51 +48,44 @@ class GryfCover(_GryfDevice):
         if self._fun_ptr:
             await self._fun_ptr(state)
 
+            _LOGGER.debug("test")
+
     @property
     def name(self):
         return f"{self._name}"
 
     async def turn_on(self):
-        for k in range(10):
-            self._feedback_update = 0
-            await self._api.set_cover(self._id , self._pin , self._time , ShutterStates.OPEN)
-
-            for i in range(10):
-                if self._feedback_update:
-                    break
-
-                await asyncio.sleep(k * 10)
-
-            if self._shutter_state == 1:
-                break
+        # for k in range(10):
+        #     self._feedback_update = 0
+        #     await self._api.set_cover(self._id , self._pin , self._time , ShutterStates.OPEN)
+        #
+        #     for i in range(10):
+        #         if self._feedback_update:
+        #             break
+        #
+        #         await asyncio.sleep(k * 10)
+        #
+        #     if self._shutter_state == 1:
+        #         break
+        #
+        await self._api.set_cover(self._id , self._pin , self._time , ShutterStates.OPEN)
 
     async def turn_off(self):
-        for k in range(10):
-            self._feedback_update = 0
-            await self._api.set_cover(self._id , self._pin , self._time , ShutterStates.CLOSE)
-            for i in range(10):
-                if self._feedback_update:
-                    break
-
-                await asyncio.sleep(k * 10)
-
-            if self._shutter_state == 2:
-                break
+        # for k in range(10):
+        #     self._feedback_update = 0
+        #     await self._api.set_cover(self._id , self._pin , self._time , ShutterStates.CLOSE)
+        #     for i in range(10):
+        #         if self._feedback_update:
+        #             break
+        #
+        #         await asyncio.sleep(k * 10)
+        #
+        #     if self._shutter_state == 2:
+        #         break
+        await self._api.set_cover(self._id , self._pin , self._time , ShutterStates.CLOSE)
 
     async def toggle(self):
-        old_state = self._shutter_state
-
-        for k in range(10):
-            self._feedback_update = 0
-            await self._api.set_cover(self._id , self._pin , self._time , ShutterStates.STEP_MODE)
-            for i in range(10):
-                if self._feedback_update:
-                    break
-
-                await asyncio.sleep(k * 10)
-
-            if self._shutter_state != old_state:
-                break
+        await self._api.set_cover(self._id , self._pin , self._time , ShutterStates.STEP_MODE)
 
     async def stop(self):
         await self._api.set_cover(self._id , self._pin , self._time , ShutterStates.STOP)
