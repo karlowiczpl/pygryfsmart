@@ -55,6 +55,9 @@ class GryfApi(_GryfFunctionsApiBase):
                 CONF_FUNCTION: func,
                 CONF_PTR: ptr
             }
+
+            self.feedback.data[func]._ptr(func, id, pin)
+
             if func != DriverFunctions.TEMP:
                 self.feedback.subscribe(data)
             else:

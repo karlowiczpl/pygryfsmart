@@ -165,30 +165,32 @@ class _GryfCommunicationApiBase():
             time: int
         ) -> None:
         """States update interval."""
+        await asyncio.sleep(1)
 
         try:
             while True:
-                for i in range(self._module_count):
-                    try:
-                        if not self._update_state_enable:
-                            await asyncio.sleep(20)
-                            self._update_state_enable = True
+                if self.feedback.data._subscription_list:
+                    for key in self.feedback.data._subscription_list:
+                        try:
+                            value = self.feedback.data._subscription_list[key]
+                            if value.inputs:
+                                command = f"{DriverActions.GET_IN_STATE}={key}\n\r"
+                                await self.send_data(command)
+                                await asyncio.sleep(0.1)
 
-                        command = f"{DriverActions.GET_IN_STATE}={i + 1}\n\r"
-                        await self.send_data(command)
-                        await asyncio.sleep(0.1)
+                            if value.outputs:
+                                command = f"{DriverActions.GET_OUT_STATE}={key}\n\r"
+                                await self.send_data(command)
+                                await asyncio.sleep(0.1)
 
-                        if not self._update_state_enable:
+                            if value.shutters:
+                                command = f"{DriverActions.GET_SHUTTER_STATE}={key}\n\r"
+                                await self.send_data(command)
+
                             await asyncio.sleep(5)
-                            self._update_state_enable = True
 
-                        command = f"{DriverActions.GET_OUT_STATE}={i + 1}\n\r"
-                        await self.send_data(command)
-                        await asyncio.sleep(5)
-                    except Exception as e:
-                        _LOGGER.error(f"Error updating module {i + 1}: {e}")
-
-                    await asyncio.sleep(time)
+                        except Exception as e:
+                            _LOGGER.error(f"Error updating module: {e}")
         except asyncio.CancelledError:
             _LOGGER.info("Update interval task cancelled.")
         except Exception as e:

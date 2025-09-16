@@ -30,11 +30,13 @@ async def async_main():
         1,
         api
     )
+    output.subscribe(async_update)
 
     cover = GryfCover("test", 2, 1, 5, api)
 
 
     await api.start_connection()
+    api.start_update_interval(1)
     cover.subscribe(async_update)
 
     await cover.turn_on()

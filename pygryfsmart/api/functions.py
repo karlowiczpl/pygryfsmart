@@ -172,3 +172,9 @@ class _GryfFunctionsApiBase(_GryfCommunicationApiBase):
         command = f"{DriverActions.GET_OUT_STATE}={driver_num}"
 
         await self.send_data(command)
+
+    async def update_shutters_info(self, driver_num: int):
+
+        command = f"{DriverActions.GET_SHUTTER_STATE}={driver_num}"
+
+        await self.send_data(command)

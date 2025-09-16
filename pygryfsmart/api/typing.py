@@ -39,6 +39,25 @@ class DriverPingInfo:
     def __repr__(self):
         return f"{self._last_update},{self._mac_adress},{self._driver_model}"
 
+class GryfDriverFunctions():
+
+    inputs = False
+    shutters = False
+    outputs = False
+    temp = []
+    pwms = []
+
+class ObservableDict(dict):
+    def __init__(self, name, ptr=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._name = name
+        self._ptr = ptr
+
+    def __setitem__(self, key, value):
+        super().__setitem__(key, value)
+
+        self._ptr(self._name, key, value)
+
 class GryfData(Dict):
 
     _drivers = []
@@ -52,13 +71,32 @@ class GryfData(Dict):
         DriverFunctions.COVER,
     ]
 
+    _subscription_list = {}
+
+    def something_changed(self, key, key1, value):
+        if key in [DriverFunctions.OUTPUTS, DriverFunctions.INPUTS, DriverFunctions.COVER]:
+            if self._subscription_list.get(key1) == None:
+                self._subscription_list[key1] = GryfDriverFunctions()
+
+            _LOGGER.debug(key)
+
+            if key == DriverFunctions.OUTPUTS:
+                self._subscription_list[key1].outputs = True
+
+            if key == DriverFunctions.COVER:
+                self._subscription_list[key1].shutters = True
+
+            if key == DriverFunctions.INPUTS:
+                self._subscription_list[key1].inputs = True
+
     def __new__(cls):
         return super(GryfData, cls).__new__(cls)
 
     def __init__(self):
         super().__init__()
         for key in self._key_list:
-            self[key] = {}
+            self[key] = ObservableDict(key, ptr=self.something_changed)
+        self._subscription_list = {}
 
     def __repr__(self):
         return f"GryfData({dict.__repr__(self)})"

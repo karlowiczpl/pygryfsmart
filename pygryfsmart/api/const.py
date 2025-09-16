@@ -47,6 +47,7 @@ class DriverActions():
     
     GET_IN_STATE = "AT+StanIN"
     GET_OUT_STATE = "AT+StanOUT"
+    GET_SHUTTER_STATE = "AT+StanROL"
 
 class ConfigurationFunctions():
     SET_PRESS_TIME = "AT+Key"

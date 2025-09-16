@@ -78,8 +78,6 @@ class Parser:
 
         try:
             await self._feedback.handle_subscribtion(function, id)
-
-            _LOGGER.debug(f"function: {function}, id: {id}")
         except Exception as e:
             _LOGGER.error(f"Error subscriber {e}")
 

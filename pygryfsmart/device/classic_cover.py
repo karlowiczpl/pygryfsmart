@@ -48,8 +48,6 @@ class GryfCover(_GryfDevice):
         if self._fun_ptr:
             await self._fun_ptr(state)
 
-            _LOGGER.debug("test")
-
     @property
     def name(self):
         return f"{self._name}"
