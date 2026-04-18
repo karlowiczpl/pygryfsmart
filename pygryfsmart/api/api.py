@@ -19,6 +19,7 @@ class GryfApi(_GryfFunctionsApiBase):
     """Base pygryfsmart class."""
 
     _gryf_expert: GryfExpert
+    _cover_toggle_metod: int=1
     
     def __init__(self,
                  port: str,
@@ -29,6 +30,9 @@ class GryfApi(_GryfFunctionsApiBase):
         super().__init__(port , callback)
 
         self._gryf_expert = GryfExpert(self)
+
+    def set_cover_toggle_metod(self, metod):
+        self._cover_toggle_metod = metod
 
     async def start_gryf_expert(self) -> None: 
         """Start gryf expert server."""
@@ -73,4 +77,3 @@ class GryfApi(_GryfFunctionsApiBase):
         state: int,
     ) -> None:
         pass
-

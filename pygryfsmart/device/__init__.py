@@ -5,7 +5,7 @@ from .pwm import GryfPwm
 from .input_line import GryfInputLine
 from .output_line import GryfOutputLine
 from .thermostat import GryfThermostat
-from .classic_cover import GryfCover
+from .classic_cover import GryfCover, GryfPercentCover
 from .pcover import GryfPCover
 from .reset import GryfReset
 from .base import _GryfDevice
@@ -20,5 +20,6 @@ __all__ = ["GryfOutput",
            "GryfCover",
            "GryfPCover",
            "GryfReset",
+           "GryfPercentCover"
            "_GryfDevice"
            ]

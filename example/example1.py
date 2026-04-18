@@ -56,9 +56,9 @@ async def async_main():
         # while changed:
         #     await asyncio.sleep(0.1)
         #
-        # await asyncio.sleep(1)
-        # for i in range(100):
-        #     await api.set_pwm(1, 2, i)
+        await asyncio.sleep(10)
+        for i in range(100):
+            await api.set_pwm(1, 2, i)
 
             await asyncio.sleep(0.001)
 

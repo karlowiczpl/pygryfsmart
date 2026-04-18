@@ -38,7 +38,7 @@ class GryfExpert:
         self.active_clients.add(writer)
 
         try:
-            message = "hello"
+            message = "\r\nConnected to RTI\r"
             writer.write(message.encode())
             await writer.drain()
             while True:
